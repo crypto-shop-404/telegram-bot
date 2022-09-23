@@ -1,0 +1,101 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-08-11 02:46+0600\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+
+msgid "shop"
+msgstr "🛒 Products"
+
+msgid "shop_management"
+msgstr "📦 All Products"
+
+msgid "product_management"
+msgstr "📝 Products Management"
+
+msgid "categories_management"
+msgstr "📁 Categories Control"
+
+msgid "category_menu"
+msgstr "📁 Category: {}"
+       "Available subcategories:"
+       "{}\n"
+       "❗️ When deleting a category/subcategory, Delete All products/categories in it"
+
+msgid "add_category"
+msgstr "📁 Add category"
+
+msgid "delete_category"
+msgstr "🗑 Delete Category"
+
+msgid "delete_subcategories"
+msgstr "🗑 Remove subcategories"
+
+msgid "all_categories"
+msgstr "📂 All available categories"
+
+msgid "category_title"
+msgstr "✏️ Enter the title"
+       "One Category - in each row"
+
+msgid "success_adding_category"
+msgstr "✅ Total categories Added: {}"
+
+msgid "success_removing_category"
+msgstr "✅ Category Removed"
+
+msgid "profile"
+msgstr "📱 Profile"
+
+msgid "balance"
+msgstr "💲 Balance"
+
+msgid "faq"
+msgstr "ℹ️ FAQ"
+
+msgid "faq"
+msgstr "ℹ️ FAQ"
+
+msgid "rules"
+msgstr "📗 Rules"
+
+msgid "hello_message"
+msgstr "👋 Greetings"
+
+msgid "comeback_message"
+msgstr "✋ Return"
+
+msgid "support"
+msgstr "👨‍💻 Support"
+
+msgid "my_support_requests"
+msgstr "📓 My Support Requests"
+
+msgid "new_support_requests"
+msgstr "📋 New Support Request"
+
+msgid "new_support_subject"
+msgstr "🆘 New Support Subject"
+
+msgid "active_supports_requests"
+msgstr "📗 Active Requests"
+
+msgid "closed_supports_requests"
+msgstr "📕 Closed Requests"
+
+msgid "accept_rules"
+msgstr "✅ Accept"
