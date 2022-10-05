@@ -2,9 +2,9 @@ import typing
 
 import aiogram.types
 
+from keyboards.inline import product_keyboards, payments_keyboard, callback_factories
 from responses import base
 from services.db_api import schemas
-from keyboards.inline import product_keyboards
 
 
 class CategoriesResponses(base.BaseResponse):
@@ -130,13 +130,19 @@ class IncorrectQuantity(base.BaseResponse):
 
 
 class PaymentMethodResponse(base.BaseResponse):
-    def __init__(self, update: aiogram.types.CallbackQuery | aiogram.types.Message):
+    def __init__(self, update: aiogram.types.CallbackQuery | aiogram.types.Message,
+                 callback_data: dict[str:str], crypto_payments: str = None):
         self.__update = update
+        callback_data.pop('@')
+        self.__keyboard = payments_keyboard.PaymentMethodsKeyboard(
+            callback_data, callback_factories.BuyProductCallbackFactory(),
+            is_balance=True, crypto_payments=crypto_payments
+        )
 
     async def _send_response(self) -> aiogram.types.Message:
         message_text = '💳 Choose a desired payment method'
         if isinstance(self.__update, aiogram.types.CallbackQuery):
             await self.__update.answer()
-            return await self.__update.message.edit_text(message_text)
+            return await self.__update.message.edit_text(message_text, reply_markup=self.__keyboard)
         elif isinstance(self.__update, aiogram.types.Message):
-            return await self.__update.answer(message_text)
+            return await self.__update.answer(message_text, reply_markup=self.__keyboard)

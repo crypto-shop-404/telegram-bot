@@ -1,20 +1,22 @@
-from collections import OrderedDict
-from urllib.parse import urlencode
 import asyncio
 import hashlib
 import hmac
 import time
+from collections import OrderedDict
+from urllib.parse import urlencode
 
 import httpx
 
+from services.payments_apis import base_payments_api
 
-class CoinPaymentsAPI:
+
+class CoinPaymentsAPI(base_payments_api.BasePaymentAPI):
     api_url = 'https://www.coinpayments.net/api.php'
     api_version = 1
 
-    def __init__(self, public_key: str, private_key: str):
+    def __init__(self, public_key: str, secret_key: str):
         self.public_key = public_key
-        self.private_key = private_key
+        self.secret_key = secret_key
 
     async def check_transaction(self, txn_id: str) -> bool:
         while not (await self.get_tx_info(txid=txn_id))['result']['status']:
@@ -97,6 +99,9 @@ class CoinPaymentsAPI:
         if not isinstance(params, bytes):
             params = bytearray(params, 'utf-8')
 
-        byte_private_key = bytearray(self.private_key, 'utf-8')
+        byte_private_key = bytearray(self.secret_key, 'utf-8')
 
         return hmac.new(byte_private_key, params, hashlib.sha512).hexdigest()
+
+    async def check(self) -> bool:
+        return (await self.get_basic_info())['error'] == 'ok'

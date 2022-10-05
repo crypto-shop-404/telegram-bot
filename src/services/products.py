@@ -55,12 +55,12 @@ class Product:
         with db_api.create_session() as session:
             product = queries.add_product(
                 session, self.name, self.description, self.price, len(self.__units),
-                os.path.split(self.__picture_path)[-1], self.category_id, self.subcategory_id
+                self.__picture_path and os.path.split(self.__picture_path)[-1], self.category_id, self.subcategory_id
             )
             if self.__picture_path is not None:
                 file_system.move_file(self.__picture_path, config.PRODUCT_PICTURE_PATH)
             for unit in self.__units:
-                unit.add_id(product.id)
+                unit.add_product_id(product.id)
                 unit.create(session)
 
     def delete(self):
@@ -87,27 +87,24 @@ class ProductUnit:
         self.__content = content
         self.__type = product_type
 
-    def add_id(self, unit_id: int):
-        self.__id = unit_id
+    def add_product_id(self, product_id: int):
+        self.__product_id = product_id
 
     def load_from_db(self, session: orm.Session = None):
-        with session or db_api.create_session() as session:
-            product_unit = queries.get_product_unit(session, self.__id)
-            self.add_content(product_unit.content, product_unit.type)
+        product_unit = queries.get_product_unit(session, self.__id)
+        self.add_content(product_unit.content, product_unit.type)
 
-    def create(self, session: orm.Session = None):
-        with session or db_api.create_session() as session:
-            product_unit = queries.add_product_unit(session, self.__product_id, self.__content, self.__type)
-            self.__id = product_unit.id
-            if self.__type == 'document':
-                file_system.move_file(config.PENDING_PATH / self.__content, config.PRODUCT_UNITS_PATH)
+    def create(self, session: orm.Session):
+        product_unit = queries.add_product_unit(session, self.__product_id, self.__content, self.__type)
+        self.__id = product_unit.id
+        if self.__type == 'document':
+            file_system.move_file(config.PENDING_PATH / self.__content, config.PRODUCT_UNITS_PATH)
 
     def delete(self, session: orm.Session = None):
-        with session or db_api.create_session() as session:
-            queries.delete_product_unit(session, self.__id)
-            self.delete_document()
-            self.__id = self.__type = self.__content = None
-            self.__path = self.__product_id = None
+        queries.delete_product_unit(session, self.__id)
+        self.delete_document()
+        self.__id = self.__type = self.__content = None
+        self.__path = self.__product_id = None
 
     def delete_document(self):
         if self.__type == 'document':

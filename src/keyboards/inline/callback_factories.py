@@ -19,6 +19,11 @@ class BuyProductCallbackFactory(callback_data.CallbackData):
         super().__init__('buy_product', 'product_id', 'available_quantity', 'quantity', 'payment_method')
 
 
+class CheckQiwiPaymentCallbackFactory(callback_data.CallbackData):
+    def __init__(self):
+        super().__init__('check_qiwi_payment', 'product_id', 'quantity', 'bill_id')
+
+
 class CategoriesCallbackFactory(callback_data.CallbackData):
     def __init__(self):
         super().__init__('categories', 'action')
@@ -39,16 +44,26 @@ class ShopInformationFactory(callback_data.CallbackData):
         super().__init__('shop_information', 'object', 'action')
 
 
-class UserCallbackFactories(callback_data.CallbackData):
+class UserCallbackFactory(callback_data.CallbackData):
     def __init__(self):
         super().__init__('users', 'filter', 'page', 'id', 'action', 'is_confirmed')
 
 
-class EditBalanceCallbackFactories(callback_data.CallbackData):
+class EditUserBalanceCallbackFactory(callback_data.CallbackData):
     def __init__(self):
         super().__init__('edit_balance', 'user_id', 'balance', 'reason', 'is_confirmed')
 
 
-class TopUpCallbackFactories(callback_data.CallbackData):
+class TopUpUserBalanceCallbackFactory(callback_data.CallbackData):
     def __init__(self):
         super().__init__('top_up_balance', 'user_id', 'balance_delta', 'payment_method', 'is_confirmed')
+
+
+class SupportCallbackFactory(callback_data.CallbackData):
+    def __init__(self):
+        super().__init__('support', 'is_open', 'user_id', 'request_id', 'action')
+
+
+class CreateSupportCallbackFactory(callback_data.CallbackData):
+    def __init__(self):
+        super().__init__('create_support', 'subject_id')

@@ -6,12 +6,9 @@ from sqlalchemy import orm
 from services.db_api import schemas
 
 
-def add_user(session: orm.Session, telegram_id: int, username: str) -> schemas.User:
+def add_user(session: orm.Session, telegram_id: int, username: str) -> None:
     user = schemas.User(telegram_id=telegram_id, username=username)
     session.merge(user)
-    session.flush()
-    session.refresh(user)
-    return user
 
 
 def add_category(session: orm.Session, name: str) -> schemas.Category:
@@ -81,10 +78,10 @@ def add_sale(session: orm.Session, user_id: int, username: str,
 
 
 def add_support_request(session: orm.Session, user_id: int, username: str,
-                        support_id: int, description: str) -> schemas.SupportRequest:
+                        subject_id: int, issue: str) -> schemas.SupportRequest:
     support_request = schemas.SupportRequest(
         user_id=user_id, username=username,
-        subject_id=support_id, description=description
+        subject_id=subject_id, issue=issue
     )
     session.add(support_request)
     session.flush()
@@ -92,12 +89,9 @@ def add_support_request(session: orm.Session, user_id: int, username: str,
     return support_request
 
 
-def add_support_subject(session: orm.Session, subject_name: str) -> schemas.SupportSubject:
-    support_subject = schemas.SupportSubject(name=subject_name)
-    session.add(support_subject)
-    session.flush()
-    session.refresh(support_subject)
-    return support_subject
+def add_support_subject(session: orm.Session, subject_name: str) -> None:
+    if not check_is_support_subject_exists(session, subject_name):
+        session.merge(schemas.SupportSubject(name=subject_name))
 
 
 def get_users(session: orm.Session, limit: int = None, offset: int = None,
@@ -228,17 +222,21 @@ def get_all_support_subjects(session: orm.Session) -> list[schemas.SupportSubjec
     return session.scalars(sqlalchemy.select(schemas.SupportSubject)).all()
 
 
-def get_support_subject(session: orm.Session, support_request_id: int) -> schemas.SupportSubject | None:
-    return session.get(schemas.SupportSubject, support_request_id)
+def get_support_subject(session: orm.Session,
+                        subject_id: int = None, name: str = None) -> schemas.SupportSubject | None:
+    if subject_id is not None:
+        return session.get(schemas.SupportRequest, subject_id)
+    elif name is not None:
+        return session.scalar(sqlalchemy.select(schemas.SupportSubject).filter_by(name=name))
 
 
-def get_active_support_requests(session: orm.Session) -> list[schemas.SupportRequest]:
-    statement = sqlalchemy.select(schemas.SupportRequest).filter(schemas.SupportRequest.is_active)
+def get_open_support_requests(session: orm.Session) -> list[schemas.SupportRequest]:
+    statement = sqlalchemy.select(schemas.SupportRequest).filter_by(is_open=True)
     return session.scalars(statement).all()
 
 
 def get_closed_support_requests(session: orm.Session) -> list[schemas.SupportRequest]:
-    statement = sqlalchemy.select(schemas.SupportRequest).filter(~schemas.SupportRequest.is_active)
+    statement = sqlalchemy.select(schemas.SupportRequest).filter_by(is_open=False)
     return session.scalars(statement).all()
 
 
@@ -280,10 +278,11 @@ def add_sold_item_unit(session: orm.Session, sale_id: int, product_unit_id) -> N
     product_unit.sale_id = sale_id
 
 
-def close_support_request(session: orm.Session, support_id: int, answer: str) -> schemas.SupportRequest:
-    support_request = session.get(schemas.SupportRequest, support_id)
-    support_request.is_active = False
-    support_request.answer = answer
+def close_support_request(session: orm.Session, request_id: int, answer: str = None) -> schemas.SupportRequest:
+    support_request = session.get(schemas.SupportRequest, request_id)
+    support_request.is_open = False
+    if answer is not None:
+        support_request.answer = answer
     return support_request
 
 
@@ -354,7 +353,7 @@ def delete_all_product_units(session: orm.Session, product_id: int) -> None:
     session.execute(statement)
 
 
-def delete_support(session: orm.Session, support_request_id: int) -> None:
+def delete_support_request(session: orm.Session, support_request_id: int) -> None:
     session.execute(sqlalchemy.delete(schemas.SupportRequest).filter_by(id=support_request_id))
 
 
@@ -376,6 +375,11 @@ def count_user_orders(session: orm.Session, user_id: int) -> int:
     return session.scalar(statement)
 
 
+def count_open_support_requests(session: orm.Session) -> int:
+    statement = sqlalchemy.select(sqlalchemy.func.count(schemas.SupportRequest.id)).filter_by(is_open=True)
+    return session.scalar(statement)
+
+
 def get_total_balance(session: orm.Session) -> float:
     return session.scalars(sqlalchemy.select(sqlalchemy.func.sum(schemas.User.balance))).first()
 
@@ -387,4 +391,9 @@ def check_is_user_exists(session: orm.Session, telegram_id: int) -> bool:
 
 def check_is_user_banned(session: orm.Session, telegram_id: int) -> bool:
     statement = sqlalchemy.exists(sqlalchemy.select(schemas.User).filter_by(telegram_id=telegram_id, is_banned=True))
+    return session.scalar(statement.select())
+
+
+def check_is_support_subject_exists(session: orm.Session, subject_name: str) -> bool:
+    statement = sqlalchemy.exists(sqlalchemy.select(schemas.SupportSubject).filter_by(name=subject_name))
     return session.scalar(statement.select())

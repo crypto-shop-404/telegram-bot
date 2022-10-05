@@ -39,21 +39,21 @@ class BuyProductButton(aiogram.types.InlineKeyboardButton):
 
 
 class ProductQuantityButton(aiogram.types.InlineKeyboardButton):
-    def __init__(self, product_id: int, quantity: int):
+    def __init__(self, product_id: int, available_quantity: int, quantity: int):
         super().__init__(
             f'{quantity} pc(s)', callback_data=callback_factories.BuyProductCallbackFactory().new(
-                product_id=product_id, available_quantity='',
+                product_id=product_id, available_quantity=available_quantity,
                 quantity=quantity, payment_method=''
             )
         )
 
 
-class OwnQuantityButton(aiogram.types.InlineKeyboardButton):
+class AnotherQuantityButton(aiogram.types.InlineKeyboardButton):
     def __init__(self, product_id: int, available_quantity: int):
         super().__init__(
             '🛒 Its value', callback_data=callback_factories.BuyProductCallbackFactory().new(
                 product_id=product_id, available_quantity=available_quantity,
-                quantity='own', payment_method=''
+                quantity='another', payment_method=''
             )
         )
 

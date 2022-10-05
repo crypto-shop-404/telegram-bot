@@ -28,14 +28,18 @@ async def add_product(query: aiogram.types, callback_data: dict[str, str]):
 
 @dp.message_handler(state=product_states.AddProduct.waiting_name)
 async def product_name(message: aiogram.types.Message, state: dispatcher.FSMContext):
-    (await state.get_data())['product'].add_name(message.text)
+    product = (await state.get_data())['product']
+    product.add_name(message.text)
+    await state.update_data({'product': product})
     await product_states.AddProduct.next()
     await responses.product_management.AddProductDescriptionResponse(message)
 
 
 @dp.message_handler(state=product_states.AddProduct.waiting_description)
 async def product_description(message: aiogram.types.Message, state: dispatcher.FSMContext):
-    (await state.get_data())['product'].add_description(message.text)
+    product = (await state.get_data())['product']
+    product.add_description(message.text)
+    await state.update_data({'product': product})
     await product_states.AddProduct.next()
     await responses.product_management.AddProductImageResponse(message)
 
@@ -50,7 +54,9 @@ async def product_picture(message: aiogram.types.Message, state: dispatcher.FSMC
         file_path = pending_dir / f'{uuid.uuid4()}.jpg'
     if file_path is not None:
         await message.photo[-1].download(destination_file=file_path)
-        (await state.get_data())['product'].add_picture(file_path)
+        product = (await state.get_data())['product']
+        product.add_picture(file_path)
+        await state.update_data({'product': product})
     await product_states.AddProduct.next()
     await responses.product_management.AddProductPriceResponse(message)
 
@@ -61,11 +67,20 @@ async def product_price(message: aiogram.types.Message, state: dispatcher.FSMCon
     if not price.replace('.', '').isdigit():
         await responses.product_management.IncorrectPriceResponse(message)
         raise dispatcher.handler.CancelHandler
-    await state.update_data({'price': float(decimal.Decimal(message.text))})
     product = (await state.get_data())['product']
+    product.add_price(float(decimal.Decimal(message.text)))
+    await state.update_data({'product': product})
     await product_states.AddProduct.next()
     await responses.product_management.SuccessProductAddingResponse(message, product.name)
     await responses.product_management.AddProductUnitResponse(message)
+
+
+@dp.message_handler(filters.Text('✅ Complete'), state=product_states.AddProduct.waiting_content)
+async def complete_product_adding(message: aiogram.types.Message, state: dispatcher.FSMContext):
+    product = (await state.get_data())['product']
+    await state.finish()
+    product.create()
+    await responses.main_menu.AdminMainMenuResponse(message)
 
 
 @dp.message_handler(state=product_states.AddProduct.waiting_content)
@@ -82,12 +97,5 @@ async def add_product_unit(message: aiogram.types.Message, state: dispatcher.FSM
         product.add_unit(product_data_file, 'document')
     elif message.text is not None:
         product.add_unit(message.text, 'text')
+    await state.update_data({'product': product})
     await responses.product_management.SuccessUnitAddingResponse(message)
-
-
-@dp.message_handler(filters.Text('✅ Complete'), state=product_states.AddProduct.waiting_content)
-async def complete_product_adding(message: aiogram.types.Message, state: dispatcher.FSMContext):
-    product = (await state.get_data())['product']
-    await state.finish()
-    product.create()
-    await responses.main_menu.AdminMainMenuResponse(message)

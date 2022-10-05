@@ -83,7 +83,7 @@ class Sale(BaseModel):
 
 class SupportSubject(BaseModel):
     __tablename__ = 'support_subject'
-    name = sqlalchemy.Column(sqlalchemy.String(255), nullable=False)
+    name = sqlalchemy.Column(sqlalchemy.String(255), nullable=False, unique=True)
 
 
 class SupportRequest(BaseModel):
@@ -92,8 +92,8 @@ class SupportRequest(BaseModel):
     user_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('user.telegram_id'), nullable=False)
     subject_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('support_subject.id'))
     username = sqlalchemy.Column(sqlalchemy.String())
-    is_active = sqlalchemy.Column(sqlalchemy.Boolean(), default=True)
-    description = sqlalchemy.Column(sqlalchemy.Text(), nullable=False)
+    is_open = sqlalchemy.Column(sqlalchemy.Boolean(), default=True)
+    issue = sqlalchemy.Column(sqlalchemy.Text(), nullable=False)
     answer = sqlalchemy.Column(sqlalchemy.Text())
 
     subject = orm.relationship('SupportSubject', backref='support_request', cascade='all, delete')

@@ -23,7 +23,7 @@ def setup_tasks():
     )
 
 
-def check_period(period: str):
+def check_period(period: str) -> bool:
     try:
         cron.CronTrigger().from_crontab(period)
     except ValueError:

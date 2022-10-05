@@ -20,6 +20,23 @@ async def add_product_unit(query: aiogram.types.CallbackQuery, callback_data: di
     await dp.current_state().update_data(callback_data | {'units': []})
 
 
+@dp.message_handler(filters.Text('✅ Complete'), state=product_states.AddProductUnit.waiting_content)
+async def complete_units_loading(message: aiogram.types.Message, state: dispatcher.FSMContext):
+    data = await state.get_data()
+    product_id = data['product_id']
+    units = data['units']
+    await state.finish()
+    for unit in units:
+        unit.create()
+    with db_api.create_session() as session:
+        queries.edit_product_quantity(session, product_id, len(units))
+        product = queries.get_product(session, product_id)
+        await responses.product_management.CompleteUnitLoadingResponse(message, product.name)
+        await responses.product_management.ProductResponse(
+            message, product, product.category_id, product.subcategory_id
+        )
+
+
 @dp.message_handler(state=product_states.AddProduct.waiting_content)
 async def add_product_unit(message: aiogram.types.Message, state: dispatcher.FSMContext):
     data = await state.get_data()
@@ -36,23 +53,6 @@ async def add_product_unit(message: aiogram.types.Message, state: dispatcher.FSM
     elif message.text is not None:
         units.append(products.ProductUnit(product_id, content=message.text, product_type='text'))
     await responses.product_management.SuccessUnitAddingResponse(message)
-
-
-@dp.message_handler(filters.Text('✅ Complete'), state=product_states.AddProductUnit.waiting_content)
-async def complete_units_loading(message: aiogram.types.Message, state: dispatcher.FSMContext):
-    data = await state.get_data()
-    product_id = data['product_id']
-    units = data['units']
-    await state.finish()
-    for unit in units:
-        unit.create()
-    with db_api.create_session() as session:
-        queries.edit_product_quantity(session, product_id, len(units))
-        product = queries.get_product(session, product_id)
-        await responses.product_management.CompleteUnitLoadingResponse(message, product.name)
-        await responses.product_management.ProductResponse(
-            message, product, product.category_id, product.subcategory_id
-        )
 
 
 @dp.callback_query_handler(callback_factories.ProductCallbackFactory().filter(action='units'))

@@ -2,17 +2,19 @@ import asyncio
 
 import httpx
 
+from services.payments_apis import base_payments_api
 
-class MinerlockAPI:
-    def __init__(self, uid: int, api_key: str):
-        self.uid = uid
+
+class MinerlockAPI(base_payments_api.BasePaymentAPI):
+    def __init__(self, api_id: int, api_key: str):
+        self.api_id = api_id
         self.api_key = api_key
-        self.url = url = 'https://api.minerlock.com'
-        self.token = self.get_token()
+        self.url = 'https://api.minerlock.com'
+        self.token = None
 
-    def get_token(self) -> str:
-        response = httpx.get(f'{self.url}/?action=get-token&uid={self.uid}&key={self.api_key}')
-        return response.json()['token']
+    def set_token(self):
+        response = httpx.get(f'{self.url}/?action=get-token&uid={self.api_id}&key={self.api_key}')
+        self.token = response.json()['token']
 
     def get_cryptocurrencies_list(self) -> list[str]:
         return [currency for currency in self.get_currencies().json()['currencies'] if currency != 'USD']
@@ -29,4 +31,7 @@ class MinerlockAPI:
     async def check_status(self) -> bool:
         while self.get_status():
             await asyncio.sleep(30)
+        return False
+
+    def check(self) -> bool:
         return False

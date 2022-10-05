@@ -11,4 +11,4 @@ KeyboardMarkup: typing.TypeAlias = aiogram.types.InlineKeyboardMarkup | aiogram.
 
 async def notify_admins(message: str, keyboard: KeyboardMarkup = None):
     for admin_id in config.AppSettings.admins_id:
-        await bot.bot.send_message(admin_id, message, reply_markup=keyboard)
+        await loader.bot.send_message(admin_id, message, reply_markup=keyboard)

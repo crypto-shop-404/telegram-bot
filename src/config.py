@@ -20,7 +20,7 @@ dotenv.load_dotenv()
 
 def set_env_var(key: str, value: str) -> None:
     dotenv_file = dotenv.find_dotenv()
-    dotenv.set_key(dotenv_file, key, value)
+    dotenv.set_key(dotenv_file, key, value, quote_mode="never")
 
 
 class TOMLSettings(collections.UserDict):
@@ -46,13 +46,13 @@ class AppSettings(pydantic.BaseSettings):
 
 class PaymentsSettings(pydantic.BaseSettings):
     __slots__ = ()
-    payment_comment: str = pydantic.Field(None, env='PAYMENT_COMMENT')
+    crypto_payments: str = TOMLSettings()['payments']['crypto_payments']
 
 
 class QIWISettings(pydantic.BaseSettings):
     __slots__ = ()
     payment_method: typing.Literal['nickname', 'number'] = TOMLSettings()['payments']['qiwi']['payment_method']
-    is_active: bool = TOMLSettings()['payments']['qiwi']['is_active']
+    is_enabled: bool = TOMLSettings()['payments']['qiwi']['is_enabled']
     number: str = pydantic.Field(None, env='QIWI_NUMBER')
     nickname: str = pydantic.Field(None, env='QIWI_NICKNAME')
     token: str = pydantic.Field(None, env='QIWI_TOKEN')
@@ -61,27 +61,27 @@ class QIWISettings(pydantic.BaseSettings):
 class YooMoneySettings(pydantic.BaseSettings):
     __slots__ = ()
     number: str = pydantic.Field(None, env='YOOMONEY_NUMBER')
-    is_active: bool = TOMLSettings()['payments']['yoomoney']['is_active']
+    is_enabled: bool = TOMLSettings()['payments']['yoomoney']['is_enabled']
     token: str = pydantic.Field(None, env='YOOMONEY_TOKEN')
 
 
 class MinerlockSettings(pydantic.BaseSettings):
     __slots__ = ()
-    is_active: bool = TOMLSettings()['payments']['minerlock']['is_active']
-    api_key: str = pydantic.Field(None, env='MINERLOCK_API_KEY')
+    is_enabled: bool = TOMLSettings()['payments']['minerlock']['is_enabled']
     api_id: int = pydantic.Field(None, env='MINERLOCK_API_ID')
+    api_key: str = pydantic.Field(None, env='MINERLOCK_API_KEY')
 
 
 class CoinpaymentsSettings(pydantic.BaseSettings):
     __slots__ = ()
-    is_active: bool = TOMLSettings()['payments']['coinpayments']['is_active']
+    is_enabled: bool = TOMLSettings()['payments']['coinpayments']['is_enabled']
     public_key: str = pydantic.Field(None, env='COINPAYMENTS_PUBLIC_KEY')
     secret_key: str = pydantic.Field(None, env='COINPAYMENTS_SECRET_KEY')
 
 
 class CoinbaseSettings(pydantic.BaseSettings):
     __slots__ = ()
-    is_active: bool = TOMLSettings()['payments']['coinbase']['is_active']
+    is_enabled: bool = TOMLSettings()['payments']['coinbase']['is_enabled']
     api_key: str = pydantic.Field(None, env='COINBASE_API_KEY')
 
 

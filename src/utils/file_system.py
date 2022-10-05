@@ -3,11 +3,6 @@ import pathlib
 import shutil
 
 
-def create_dir(path: str | pathlib.Path) -> None:
-    if not os.path.exists(path):
-        os.mkdir(path)
-
-
 def delete_dir(path: str | pathlib.Path):
     if os.path.exists(path):
         os.rmdir(path)

@@ -24,15 +24,15 @@ class UsersKeyboard(aiogram.types.InlineKeyboardMarkup):
             self.add(users_buttons.SearchUsersButton(**callback_data))
         else:
             self.add(navigation_buttons.InlineBackButton(
-                callback_query=callback_factories.UserCallbackFactories().new(
+                callback_query=callback_factories.UserCallbackFactory().new(
                     filter='', page=page, id='', action='', is_confirmed=''
                 )))
         if len(users) > page_size:
-            self.add(navigation_buttons.NextButton(callback_factories.UserCallbackFactories().new(
+            self.add(navigation_buttons.NextButton(callback_factories.UserCallbackFactory().new(
                 filter=users_filter, page=page + 1, id='', action='', is_confirmed=''
             )))
         if page > 0:
-            self.add(navigation_buttons.PreviousButton(callback_factories.UserCallbackFactories().new(
+            self.add(navigation_buttons.PreviousButton(callback_factories.UserCallbackFactory().new(
                 filter=users_filter, page=page - 1, id='', action='', is_confirmed=''
             )))
         self.add(common_buttons.CloseButton())
@@ -51,7 +51,7 @@ class UserKeyboard(aiogram.types.InlineKeyboardMarkup):
             is_user_banned else users_buttons.BanUserButton(user_id, **callback_data)
         )
         self.row(common_buttons.CloseButton())
-        self.row(navigation_buttons.InlineBackButton(callback_factories.UserCallbackFactories().new(
+        self.row(navigation_buttons.InlineBackButton(callback_factories.UserCallbackFactory().new(
             filter=callback_data['filter'], page=callback_data['page'], id='', action='', is_confirmed=''
         )))
 
@@ -65,7 +65,7 @@ class BalanceEditingReasonsKeyboard(aiogram.types.InlineKeyboardMarkup):
             users_buttons.AdminMistakeButton(user_id, balance)
         )
         self.add(common_buttons.CloseButton())
-        self.add(navigation_buttons.InlineBackButton(callback_factories.UserCallbackFactories().new(
+        self.add(navigation_buttons.InlineBackButton(callback_factories.UserCallbackFactory().new(
             filter='', page='0', id=user_id, action='manage', is_confirmed=''
         )))
 
@@ -78,6 +78,6 @@ class BalanceRefillMethodsKeyboard(aiogram.types.InlineKeyboardMarkup):
             users_buttons.AnotherPaymentMethod(user_id, balance)
         )
         self.add(common_buttons.CloseButton())
-        self.add(navigation_buttons.InlineBackButton(callback_factories.UserCallbackFactories().new(
+        self.add(navigation_buttons.InlineBackButton(callback_factories.UserCallbackFactory().new(
             filter='', page='0', id=user_id, action='manage', is_confirmed=''
         )))

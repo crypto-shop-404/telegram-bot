@@ -81,7 +81,7 @@ class BanUserAlertResponse(base.BaseResponse):
         self.__query = query
         self.__user = user
         self.__keyboard = common_keybords.ConfirmationKeyboard(
-            callback_factories.UserCallbackFactories(), **callback_data
+            callback_factories.UserCallbackFactory(), **callback_data
         )
 
     async def _send_response(self):
@@ -99,7 +99,7 @@ class UnbanUserAlertResponse(base.BaseResponse):
         self.__query = query
         self.__user = user
         self.__keyboard = common_keybords.ConfirmationKeyboard(
-            callback_factories.UserCallbackFactories(), **callback_data
+            callback_factories.UserCallbackFactory(), **callback_data
         )
 
     async def _send_response(self):
@@ -117,7 +117,7 @@ class DeleteUserAlert(base.BaseResponse):
         self.__query = query
         self.__user = user
         self.__keyboard = common_keybords.ConfirmationKeyboard(
-            callback_factories.UserCallbackFactories(), **callback_data
+            callback_factories.UserCallbackFactory(), **callback_data
         )
 
     async def _send_response(self):
@@ -148,7 +148,7 @@ class EditBalanceAlertResponse(base.BaseResponse):
         self.__new_balance = new_balance
         callback_data['balance'] = new_balance
         self.__keyboard = common_keybords.ConfirmationKeyboard(
-            callback_factories.EditBalanceCallbackFactories(), **callback_data
+            callback_factories.EditUserBalanceCallbackFactory(), **callback_data
         )
 
     async def _send_response(self):
@@ -218,7 +218,7 @@ class TopUpBalanceAlertResponse(base.BaseResponse):
         self.__balance = balance
         callback_data['balance_delta'] = balance
         self.__keyboard = common_keybords.ConfirmationKeyboard(
-            callback_factories.TopUpCallbackFactories(), **callback_data
+            callback_factories.TopUpUserBalanceCallbackFactory(), **callback_data
         )
 
     async def _send_response(self):

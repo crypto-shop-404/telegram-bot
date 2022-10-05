@@ -63,11 +63,7 @@ class ProductQuantityKeyboard(aiogram.types.InlineKeyboardMarkup):
     def __init__(self, product_id: int, available_quantity: int):
         super().__init__(row_width=5)
         self.add(
-            *[product_buttons.ProductQuantityButton(product_id, i) for i in range(1, available_quantity + 1)]
+            *[product_buttons.ProductQuantityButton(product_id, available_quantity, i)
+              for i in range(1, available_quantity + 1)]
         )
-        self.row(product_buttons.OwnQuantityButton(product_id, available_quantity))
-
-
-class PaymentMethodsKeyboard(aiogram.types.InlineKeyboardMarkup):
-    def __init__(self, payment_settings: dict):
-        super().__init__(row_width=1)
+        self.row(product_buttons.AnotherQuantityButton(product_id, available_quantity))
