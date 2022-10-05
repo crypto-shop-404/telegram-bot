@@ -55,10 +55,14 @@ async def send_database_backup_to_admin(admin_id: int):
 
 
 def make_project_backup():
+    if not config.BACKUP_PATH.exists():
+        config.BACKUP_PATH.mkdir()
     os.system(pathlib.Path(os.path.abspath('..')) / 'scripts' / 'backup_project.sh')
 
 
 def make_database_backup():
+    if not config.BACKUP_PATH.exists():
+        config.BACKUP_PATH.mkdir()
     backup_dir = config.BACKUP_PATH / 'database'
     if not backup_dir.exists():
         backup_dir.mkdir()
