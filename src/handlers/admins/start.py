@@ -6,7 +6,7 @@ import responses.main_menu
 import responses.start
 from loader import dp
 from filters import is_user_in_db, is_admin
-from services import db_api
+from services import db_api, notifications
 from services.db_api import queries
 
 
@@ -18,6 +18,7 @@ async def accept_rules(message: aiogram.types.Message):
         )
         await responses.start.NewUserResponse(message)
         await responses.main_menu.AdminMainMenuResponse(message)
+        await notifications.NewUserNotification(message.from_user.id, message.from_user.username).send()
 
 
 @dp.message_handler(filters.CommandStart(), is_admin.IsUserAdmin(), is_user_in_db.IsUserInDB(show_alert=False))

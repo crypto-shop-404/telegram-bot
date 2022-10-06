@@ -6,12 +6,12 @@ import responses.support
 from filters import is_admin, is_user_in_db
 from keyboards.inline import callback_factories
 from loader import dp
-from services import db_api
+from services import db_api, notifications
 from services.db_api import queries
 from states import support_states
 
 
-@dp.message_handler(filters.Text('👨‍💻 Support'), is_user_in_db.IsUserInDB())
+@dp.message_handler(filters.Text('👨‍💻 Support'), ~is_admin.IsUserAdmin(), is_user_in_db.IsUserInDB())
 async def support(message: aiogram.types.Message):
     await responses.support.UserSupportMenuResponse(message)
 
@@ -36,12 +36,13 @@ async def new_support_request(message: aiogram.types.Message, state: dispatcher.
     subject_id = int((await state.get_data())['subject_id'])
     await state.finish()
     with db_api.create_session() as session:
-        queries.add_support_request(
+        request = queries.add_support_request(
             session, message.from_user.id, message.from_user.username, subject_id, message.text
         )
         await responses.support.SuccessAddingSupportRequestResponse(
             message, queries.count_open_support_requests(session)
         )
+        await notifications.NewSupportRequestNotification(request).send()
 
 
 @dp.message_handler(filters.Text('🆘 New Support Subject'), is_user_in_db.IsUserInDB())

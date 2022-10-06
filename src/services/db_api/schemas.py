@@ -75,10 +75,10 @@ class Sale(BaseModel):
     username = sqlalchemy.Column(sqlalchemy.String(255))
     product_name = sqlalchemy.Column(sqlalchemy.String(255), nullable=False)
     amount = sqlalchemy.Column(sqlalchemy.Float(), nullable=False)
-    count = sqlalchemy.Column(sqlalchemy.Integer(), nullable=False)
+    quantity = sqlalchemy.Column(sqlalchemy.Integer(), nullable=False)
     payment_type = sqlalchemy.Column(sqlalchemy.String(255), nullable=False)
 
-    product_unit = orm.relationship('ProductUnit', backref='sale', cascade='all, delete')
+    product_unit = orm.relationship('ProductUnit', lazy=False, backref='sale', cascade='all, delete')
 
 
 class SupportSubject(BaseModel):
@@ -96,5 +96,7 @@ class SupportRequest(BaseModel):
     issue = sqlalchemy.Column(sqlalchemy.Text(), nullable=False)
     answer = sqlalchemy.Column(sqlalchemy.Text())
 
-    subject = orm.relationship('SupportSubject', backref='support_request', cascade='all, delete')
+    subject = orm.relationship(
+        'SupportSubject', lazy=False, backref='support_request', cascade='all, delete',
+    )
     user = orm.relationship('User', backref='support_request', lazy=False)

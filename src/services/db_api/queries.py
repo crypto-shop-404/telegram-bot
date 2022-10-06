@@ -66,10 +66,10 @@ def add_product_unit(session: orm.Session, product_id: int, content_type: str, c
 
 def add_sale(session: orm.Session, user_id: int, username: str,
              product_name: str, amount: float,
-             count: int, payment_type: str) -> schemas.Sale:
+             quantity: int, payment_type: str) -> schemas.Sale:
     sale = schemas.Sale(
         user_id=user_id, username=username, product_name=product_name,
-        amount=amount, count=count, payment_type=payment_type
+        amount=amount, quantity=quantity, payment_type=payment_type
     )
     session.add(sale)
     session.flush()
@@ -193,10 +193,10 @@ def get_all_product_unit(session: orm.Session, product_id: int) -> list[schemas.
 
 
 def get_not_sold_product_units(session: orm.Session, product_id: int,
-                               count: int = None) -> list[schemas.ProductUnit]:
+                               quantity: int = None) -> list[schemas.ProductUnit]:
     statement = sqlalchemy.select(schemas.ProductUnit).filter_by(product_id=product_id, sale_id=None)
-    if count is not None:
-        statement = statement.limit(count)
+    if quantity is not None:
+        statement = statement.limit(quantity)
     return session.scalars(statement).all()
 
 

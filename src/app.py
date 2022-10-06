@@ -8,7 +8,7 @@ import handlers
 import middlewares
 import tasks
 from services import db_api
-from utils import notify_admins
+from utils import notify_users
 
 
 logger = logging.getLogger(__name__)

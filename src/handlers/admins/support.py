@@ -9,9 +9,10 @@ from loader import dp
 from services import db_api
 from services.db_api import queries
 from states import support_states
+from services import notifications
 
 
-@dp.message_handler(filters.Text('👨‍💻 Support'), is_user_in_db.IsUserInDB(), is_admin.IsUserAdmin())
+@dp.message_handler(filters.Text('👨‍💻 Support'), is_admin.IsUserAdmin(), is_user_in_db.IsUserInDB())
 async def support(message: aiogram.types.Message):
     await responses.support.AdminSupportMenuResponse(message)
 
@@ -64,6 +65,7 @@ async def delete_request(query: aiogram.types.CallbackQuery, callback_data: dict
                            is_user_in_db.IsUserInDB(), is_admin.IsUserAdmin(), chat_type='private')
 async def close_request(query: aiogram.types.CallbackQuery, callback_data: dict[str: str]):
     with db_api.create_session() as session:
+        request = queries.get_support_request(session, int(callback_data['request_id']))
         queries.close_support_request(session, int(callback_data['request_id']))
         if callback_data['is_open'] == 'yes':
             support_requests = queries.get_open_support_requests(session)
@@ -71,6 +73,7 @@ async def close_request(query: aiogram.types.CallbackQuery, callback_data: dict[
         elif callback_data['is_open'] == 'no':
             support_requests = queries.get_closed_support_requests(session)
             await responses.support.ClosedSupportRequestsResponse(query, support_requests)
+        await notifications.AnsweredSupportRequestNotification(request.id, '').send(request.user_id)
 
 
 @dp.callback_query_handler(callback_factories.SupportCallbackFactory().filter(action='answer'),
@@ -86,10 +89,12 @@ async def answer_request(query: aiogram.types.CallbackQuery, callback_data: dict
 async def answer_request(message: aiogram.types.Message, state: dispatcher.FSMContext):
     callback_data = (await state.get_data())['callback_data']
     with db_api.create_session() as session:
-        queries.close_support_request(session, int(callback_data['request_id']))
+        queries.close_support_request(session, int(callback_data['request_id']), message.text)
         if callback_data['is_open'] == 'yes':
             support_requests = queries.get_open_support_requests(session)
             await responses.support.OpenSupportRequestsResponse(message, support_requests)
         elif callback_data['is_open'] == 'no':
             support_requests = queries.get_closed_support_requests(session)
             await responses.support.ClosedSupportRequestsResponse(message, support_requests)
+        request = queries.get_support_request(session, int(callback_data['request_id']))
+        await notifications.AnsweredSupportRequestNotification(request.id, request.answer).send(request.user_id)
