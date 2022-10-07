@@ -72,8 +72,8 @@ class ProductUnit(BaseModel):
 class Sale(BaseModel):
     __tablename__ = 'sale'
     user_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('user.id'), nullable=False)
+    product_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('product.id'), nullable=False)
     username = sqlalchemy.Column(sqlalchemy.String(255))
-    product_name = sqlalchemy.Column(sqlalchemy.String(255), nullable=False)
     amount = sqlalchemy.Column(sqlalchemy.Float(), nullable=False)
     quantity = sqlalchemy.Column(sqlalchemy.Integer(), nullable=False)
     payment_type = sqlalchemy.Column(sqlalchemy.String(255), nullable=False)

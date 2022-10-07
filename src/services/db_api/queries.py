@@ -65,10 +65,10 @@ def add_product_unit(session: orm.Session, product_id: int, content_type: str, c
 
 
 def add_sale(session: orm.Session, user_id: int, username: str,
-             product_name: str, amount: float,
+             product_id: int, amount: float,
              quantity: int, payment_type: str) -> schemas.Sale:
     sale = schemas.Sale(
-        user_id=user_id, username=username, product_name=product_name,
+        user_id=user_id, product_id=product_id, username=username,
         amount=amount, quantity=quantity, payment_type=payment_type
     )
     session.add(sale)
@@ -105,6 +105,11 @@ def get_users(session: orm.Session, limit: int = None, offset: int = None,
         statement = statement.limit(limit)
         if offset is not None:
             statement = statement.offset(offset)
+    return session.scalars(statement).all()
+
+
+def get_buyers(session: orm.Session):
+    statement = sqlalchemy.select(schemas.User).join(schemas.Sale)
     return session.scalars(statement).all()
 
 
@@ -200,8 +205,12 @@ def get_not_sold_product_units(session: orm.Session, product_id: int,
     return session.scalars(statement).all()
 
 
-def get_all_sales(session: orm.Session) -> list[schemas.Sale]:
-    return session.scalars(sqlalchemy.select(schemas.Sale)).all()
+def get_products_sold_units_quantity(session: orm.Session) -> list[tuple[str, int]]:
+    statement = sqlalchemy.select(
+        schemas.Product.name,
+        sqlalchemy.func.count(schemas.Sale.quantity)
+    ).join(schemas.Sale).group_by(schemas.Sale.product_id)
+    return session.execute(statement).all()
 
 
 def get_sales_by_user_id(session: orm.Session, user_id: int) -> list[schemas.Sale]:
@@ -375,13 +384,24 @@ def count_user_orders(session: orm.Session, user_id: int) -> int:
     return session.scalar(statement)
 
 
+def count_sold_product_units(session: orm.Session) -> bool:
+    statement = sqlalchemy.select(sqlalchemy.func.count(schemas.ProductUnit.id).filter(
+        schemas.ProductUnit.sale_id is not None
+    ))
+    return session.scalar(statement)
+
+
 def count_open_support_requests(session: orm.Session) -> int:
     statement = sqlalchemy.select(sqlalchemy.func.count(schemas.SupportRequest.id)).filter_by(is_open=True)
     return session.scalar(statement)
 
 
+def get_total_orders_amount(session: orm.Session) -> bool:
+    return session.scalar(sqlalchemy.select(sqlalchemy.func.sum(schemas.Sale.amount))) or 0
+
+
 def get_total_balance(session: orm.Session) -> float:
-    return session.scalars(sqlalchemy.select(sqlalchemy.func.sum(schemas.User.balance))).first()
+    return session.scalar(sqlalchemy.select(sqlalchemy.func.sum(schemas.User.balance)))
 
 
 def check_is_user_exists(session: orm.Session, telegram_id: int) -> bool:
