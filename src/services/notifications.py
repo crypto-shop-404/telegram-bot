@@ -99,3 +99,17 @@ class AnsweredSupportRequestNotification(BaseNotification):
                 '📕 Answer:\n\n' + self.__answer
         )
         await bot.send_message(user_id, text)
+
+
+class ErrorNotification(BaseNotification):
+    def __init__(self, error_message: Exception):
+        self.__error_message = error_message
+
+    async def send(self):
+        text = (
+            f"❗ Error During Operation ❗\n"
+            f"{self.__error_message}\n\n❗"
+            f" The bot will restart automatically."
+        )
+        for user_id in AppSettings().admins_id:
+            await bot.send_message(user_id, text)

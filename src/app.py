@@ -8,7 +8,7 @@ import handlers
 import middlewares
 import tasks
 from services import db_api
-from utils import notify_users
+from services import notifications
 
 
 logger = logging.getLogger(__name__)
@@ -40,9 +40,6 @@ if __name__ == "__main__":
     except RuntimeError as e:
         logger.critical("Error during bot starting!")
         asyncio.run(
-            notify_admins.notify_admins(
-                (f"❗ Error During Operation ❗\n"
-                 f"{e}\n\n❗"
-                 f" The bot will restart automatically.")
-            )
+            asyncio.run(notifications.ErrorNotification(e).send())
         )
+
