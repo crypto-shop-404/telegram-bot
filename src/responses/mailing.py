@@ -21,7 +21,7 @@ class CreateNewsletterResponse(base.BaseResponse):
 
     async def _send_response(self) -> aiogram.types.Message:
         return await self.__message.answer(
-            '✏️ Enter the text of your newsletter in the format HTML\n'
+            '✏️ Enter the text of your newsletter in the usual telegram format\n'
             'Or attach a photo, and specify the text in the description to the picture'
         )
 
