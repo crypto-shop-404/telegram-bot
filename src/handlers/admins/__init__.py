@@ -7,8 +7,8 @@ from .users import dp
 from .backup import dp
 from .support import dp
 from .statistics import dp
+from .shop_info import dp
 # from .balance import dp
-# from .products import dp
 # from .payments import dp
 
 

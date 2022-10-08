@@ -100,3 +100,10 @@ class SupportRequest(BaseModel):
         'SupportSubject', lazy=False, backref='support_request', cascade='all, delete',
     )
     user = orm.relationship('User', backref='support_request', lazy=False)
+
+
+class ShopInformation(BaseModel):
+    __tablename__ = 'shop_information'
+
+    key = sqlalchemy.Column(sqlalchemy.String())
+    value = sqlalchemy.Column(sqlalchemy.String())

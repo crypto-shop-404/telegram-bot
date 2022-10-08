@@ -12,16 +12,16 @@ class FAQKeyboard(aiogram.types.InlineKeyboardMarkup):
 class RulesKeyboard(aiogram.types.InlineKeyboardMarkup):
     def __init__(self):
         super().__init__()
-        self.add(shop_information_buttons.RulesButton())
+        self.add(shop_information_buttons.EditRulesButton())
 
 
 class GreetingsKeyboard(aiogram.types.InlineKeyboardMarkup):
     def __init__(self):
         super().__init__()
-        self.add(shop_information_buttons.GreetingsButton())
+        self.add(shop_information_buttons.EditGreetingsButton())
 
 
 class ComebackMessageKeyboard(aiogram.types.InlineKeyboardMarkup):
     def __init__(self):
         super().__init__()
-        self.add(shop_information_buttons.ComebackMessageButton())
+        self.add(shop_information_buttons.EditComebackMessageButton())

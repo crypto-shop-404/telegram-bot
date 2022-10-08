@@ -249,6 +249,26 @@ def get_closed_support_requests(session: orm.Session) -> list[schemas.SupportReq
     return session.scalars(statement).all()
 
 
+def get_faq(session: orm.Session) -> schemas.ShopInformation:
+    statement = sqlalchemy.select(schemas.ShopInformation).filter_by(key='faq')
+    return session.scalars(statement).first()
+
+
+def get_rules(session: orm.Session) -> schemas.ShopInformation:
+    statement = sqlalchemy.select(schemas.ShopInformation).filter_by(key='rules')
+    return session.scalars(statement).first()
+
+
+def get_greetings(session: orm.Session) -> schemas.ShopInformation:
+    statement = sqlalchemy.select(schemas.ShopInformation).filter_by(key='greetings')
+    return session.scalars(statement).first()
+
+
+def get_comeback_message(session: orm.Session) -> schemas.ShopInformation:
+    statement = sqlalchemy.select(schemas.ShopInformation).filter_by(key='comeback_message')
+    return session.scalars(statement).first()
+
+
 def ban_user(session: orm.Session, user_id: int) -> schemas.User | None:
     user = get_user(session, user_id)
     if user is not None:
@@ -324,11 +344,47 @@ def edit_product_price(session: orm.Session, product_id: int, price: float) -> s
     return product
 
 
-def edit_product_quantity(session: orm.Session, product_id: int, delta: int):
+def edit_product_quantity(session: orm.Session, product_id: int, delta: int) -> schemas.Product:
     product = get_product(session, product_id)
     if product is not None:
         product.quantity += delta
     return product
+
+
+def edit_faq(session: orm.Session, faq_value: str):
+    faq = get_faq(session)
+    if faq is None:
+        faq = schemas.ShopInformation(key='faq', value=faq_value)
+        session.add(faq)
+    else:
+        faq.value = faq_value
+
+
+def edit_rules(session: orm.Session, rules_value: str):
+    rules = get_rules(session)
+    if rules is None:
+        rules = schemas.ShopInformation(key='rules', value=rules_value)
+        session.add(rules)
+    else:
+        rules.value = rules_value
+
+
+def edit_greetings(session: orm.Session, greetings_value: str):
+    greetings = get_greetings(session)
+    if greetings is None:
+        greetings = schemas.ShopInformation(key='greetings', value=greetings_value)
+        session.add(greetings)
+    else:
+        greetings.value = greetings_value
+
+
+def edit_comeback_message(session: orm.Session, comeback_message_value: str):
+    comeback_message = get_greetings(session)
+    if comeback_message is None:
+        comeback_message = schemas.ShopInformation(key='comeback_message', value=comeback_message_value)
+        session.add(comeback_message)
+    else:
+        comeback_message.value = comeback_message_value
 
 
 def delete_user(session: orm.Session, user_id: int) -> None:
