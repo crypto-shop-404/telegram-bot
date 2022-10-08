@@ -8,7 +8,7 @@ from services import payments_apis
 
 
 class PaymentsAPIsRepository(base_repository.BaseRepository):
-    def __init__(self):
+    def __init__(self, crypto_payments: str = None):
         self.__settings_repository = PaymentsAPIsSettingsRepository()
         self.__apis: dict[str: payments_apis.BasePaymentAPI] = {
             'qiwi': payments_apis.QiwiAPI(self.__settings_repository.get('qiwi').token),
@@ -23,15 +23,15 @@ class PaymentsAPIsRepository(base_repository.BaseRepository):
             ),
             'coinbase': payments_apis.CoinbaseAPI(self.__settings_repository.get('coinbase').api_key),
         }
-        crypto_payments = self.__apis.get(config.PaymentsSettings().crypto_payments)
         if crypto_payments is not None:
-            self.__apis['crypto_payments'] = crypto_payments
+            self.__apis['crypto_payments'] = self.__apis[crypto_payments]
             self.__apis.pop('minerlock')
             self.__apis.pop('coinbase')
             self.__apis.pop('coinpayments')
             self.__settings_repository.add(
-                'crypto_payments', self.__settings_repository.get(
-                    config.PaymentsSettings().crypto_payments
+                'crypto_payments',
+                self.__settings_repository.get(
+                    crypto_payments
                 )
             )
 

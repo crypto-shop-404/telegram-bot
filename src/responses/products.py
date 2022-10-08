@@ -2,7 +2,7 @@ import typing
 
 import aiogram.types
 
-from keyboards.inline import product_keyboards, payments_keyboard, callback_factories
+from keyboards.inline import product_keyboards, callback_factories, payments_keyboards
 from responses import base
 from services.db_api import schemas
 
@@ -134,7 +134,7 @@ class PaymentMethodResponse(base.BaseResponse):
                  callback_data: dict[str:str], crypto_payments: str = None):
         self.__update = update
         callback_data.pop('@')
-        self.__keyboard = payments_keyboard.PaymentMethodsKeyboard(
+        self.__keyboard = payments_keyboards.PaymentMethodsKeyboard(
             callback_data, callback_factories.BuyProductCallbackFactory(),
             is_balance=True, crypto_payments=crypto_payments
         )

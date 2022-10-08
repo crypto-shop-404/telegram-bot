@@ -117,28 +117,28 @@ async def another_product_quantity(message: aiogram.types.Message, state: dispat
 @dp.callback_query_handler(callback_factories.BuyProductCallbackFactory().filter(payment_method='qiwi'),
                            is_user_in_db.IsUserInDB())
 async def qiwi(query: aiogram.types.CallbackQuery):
-    await query.message.answer('🏗 Under Development')
+    await query.message.answer('🚧 Under Development')
 
 
 @dp.callback_query_handler(callback_factories.BuyProductCallbackFactory().filter(payment_method='yoomoney'),
                            is_user_in_db.IsUserInDB())
 async def yoomoney(query: aiogram.types.CallbackQuery):
-    await query.message.answer('🏗 Under Development')
+    await query.message.answer('🚧 Under Development')
 
 
 @dp.callback_query_handler(callback_factories.BuyProductCallbackFactory().filter(payment_method='minerlock'),
                            is_user_in_db.IsUserInDB())
 async def minerlock(query: aiogram.types.CallbackQuery):
-    await query.message.answer('🏗 Under Development')
+    await query.message.answer('🚧 Under Development')
 
 
 @dp.callback_query_handler(callback_factories.BuyProductCallbackFactory().filter(payment_method='coinpayments'),
                            is_user_in_db.IsUserInDB())
 async def coinpayments(query: aiogram.types.CallbackQuery):
-    await query.message.answer('🏗 Under Development')
+    await query.message.answer('🚧 Under Development')
 
 
 @dp.callback_query_handler(callback_factories.BuyProductCallbackFactory().filter(payment_method='coinbase'),
                            is_user_in_db.IsUserInDB())
 async def coinbase(query: aiogram.types.CallbackQuery):
-    await query.message.answer('Hello')
+    await query.message.answer('🚧 Under Development')

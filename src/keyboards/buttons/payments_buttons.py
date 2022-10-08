@@ -1,7 +1,5 @@
 import aiogram.utils.callback_data
 
-from keyboards.inline import callback_factories
-
 
 class QiwiButton(aiogram.types.InlineKeyboardButton):
     def __init__(self, callback_data: dict[str: str], callback_factory: aiogram.utils.callback_data.CallbackData):
@@ -46,11 +44,26 @@ class BalanceButton(aiogram.types.InlineKeyboardButton):
         super().__init__('💲 Balance', callback_data=callback_factory.new(**callback_data))
 
 
-class CheckQIWIPaymentButton(aiogram.types.InlineKeyboardButton):
-    def __init__(self, bill_id: int):
-        super().__init__(
-            '☑️ Check Payment',
-            callback_data=callback_factories.CheckQiwiPaymentCallbackFactory().new(
-                bill_id=bill_id
-            )
-        )
+class ManageQIWIButton(aiogram.types.KeyboardButton):
+    def __init__(self):
+        super().__init__('🥝 QIWI')
+
+
+class ManageYooMoneyButton(aiogram.types.KeyboardButton):
+    def __init__(self):
+        super().__init__('💵 YooMoney')
+
+
+class ManageMinerlockButton(aiogram.types.KeyboardButton):
+    def __init__(self):
+        super().__init__('📩 Minerlock')
+
+
+class ManageCoinPaymentsButton(aiogram.types.KeyboardButton):
+    def __init__(self):
+        super().__init__('🔗 CoinPayments')
+
+
+class ManageCoinbaseButton(aiogram.types.KeyboardButton):
+    def __init__(self):
+        super().__init__('🌐 Coinbase')
