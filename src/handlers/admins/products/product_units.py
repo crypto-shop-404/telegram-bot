@@ -5,8 +5,8 @@ from aiogram import dispatcher, filters
 
 import config
 import responses.product_management
-from loader import dp
 from keyboards.inline import callback_factories
+from loader import dp
 from services import db_api
 from services import products
 from services.db_api import queries
@@ -29,7 +29,6 @@ async def complete_units_loading(message: aiogram.types.Message, state: dispatch
     for unit in units:
         unit.create()
     with db_api.create_session() as session:
-        queries.edit_product_quantity(session, product_id, len(units))
         product = queries.get_product(session, product_id)
         await responses.product_management.CompleteUnitLoadingResponse(message, product.name)
         await responses.product_management.ProductResponse(
@@ -133,7 +132,6 @@ async def delete_product_unit(query: aiogram.types.CallbackQuery, callback_data:
     unit = products.ProductUnit(unit_id=int(callback_data['id']))
     with db_api.create_session() as session:
         unit.delete(session)
-        queries.edit_product_quantity(session, product_id, -1)
         units = queries.get_not_sold_product_units(session, product_id)
         await responses.product_management.SuccessRemovalUnitResponse(query)
         await responses.product_management.ProductUnitsResponse(

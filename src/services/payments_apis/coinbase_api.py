@@ -10,7 +10,7 @@ class CoinbaseAPI(base_payments_api.BasePaymentAPI):
     def __init__(self, api_key: str):
         self.client = coinbase_commerce.client.Client(api_key=api_key)
 
-    def create_charge(self, name: str, price: float, description: str = None):
+    def create_charge(self, name: str, price: float, description: str = None) -> charge.Charge:
         charge_info = {
             "name": name,
             "description": description,

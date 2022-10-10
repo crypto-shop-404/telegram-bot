@@ -38,13 +38,13 @@ def add_subcategories(session: orm.Session, subcategories: list[str], category_i
 
 
 def add_product(session: orm.Session, name: str, description: str,
-                price: float, quantity: int, picture: str, category_id: int,
+                price: float, picture: str, category_id: int,
                 subcategory_id: int = None) -> schemas.Product:
     product = schemas.Product(
         category_id=category_id,
         subcategory_id=subcategory_id,
         name=name, description=description,
-        picture=picture, price=price, quantity=quantity
+        picture=picture, price=price
     )
     session.add(product)
     session.flush()
@@ -302,7 +302,7 @@ def edit_product_unit(session: orm.Session, product_unit_id: int, product_unit_t
     product_unit.type = product_unit_type
 
 
-def add_sold_item_unit(session: orm.Session, sale_id: int, product_unit_id) -> None:
+def add_sold_product_unit(session: orm.Session, sale_id: int, product_unit_id) -> None:
     product_unit = get_product_unit(session, product_unit_id)
     product_unit.sale_id = sale_id
 
@@ -341,13 +341,6 @@ def edit_product_price(session: orm.Session, product_id: int, price: float) -> s
     product = get_product(session, product_id)
     if product is not None:
         product.price = price
-    return product
-
-
-def edit_product_quantity(session: orm.Session, product_id: int, delta: int) -> schemas.Product:
-    product = get_product(session, product_id)
-    if product is not None:
-        product.quantity += delta
     return product
 
 

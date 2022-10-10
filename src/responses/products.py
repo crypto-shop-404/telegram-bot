@@ -65,13 +65,15 @@ class SubcategoryProductsResponse(base.BaseResponse):
 
 class ProductResponse(base.BaseResponse):
     def __init__(self, query: aiogram.types.CallbackQuery, product: schemas.Product,
-                 category_id: int, subcategory_id: int = None, picture: typing.BinaryIO = None):
+                 product_quantity: int, category_id: int, subcategory_id: int = None,
+                 picture: typing.BinaryIO = None):
         self.__query = query
         self.__product = product
         self.__picture = picture
-        self.__is_available = self.__product.quantity > 0
+        self.__product_quantity = product_quantity
+        self.__is_available = product_quantity > 0
         self.__keyboard = product_keyboards.ProductKeyboard(
-            self.__product.id, self.__product.quantity, category_id, subcategory_id, self.__is_available
+            self.__product.id, self.__product_quantity, category_id, subcategory_id, self.__is_available
         )
 
     async def _send_response(self) -> aiogram.types.Message:
@@ -79,7 +81,7 @@ class ProductResponse(base.BaseResponse):
             f'📓 Name: {self.__product.name}\n'
             f'📋 Description:\n {self.__product.description}\n'
             f'💳 Price: ${self.__product.price}.\n\n'
-            f'📦 Available to purchase: {self.__product.quantity} pc(s)\n\n'
+            f'📦 Available to purchase: {self.__product_quantity} pc(s)\n\n'
         )
         if not self.__is_available:
             message_text += '❗️  The items are temporarily unavailable ❗️'
@@ -106,7 +108,7 @@ class ProductQuantityResponse(base.BaseResponse):
         )
 
 
-class OwnProductQuantityResponse(base.BaseResponse):
+class AnotherProductQuantityResponse(base.BaseResponse):
     def __init__(self, query: aiogram.types.CallbackQuery, available_quantity: int):
         self.__query = query
         self.__available_quantity = available_quantity

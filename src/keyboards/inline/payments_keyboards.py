@@ -24,3 +24,9 @@ class PaymentMethodsKeyboard(aiogram.types.InlineKeyboardMarkup):
         self.add(navigation_buttons.InlineBackButton(
             callback_factory.new(**(callback_data | {'quantity': '', 'payment_method': ''})))
         )
+
+
+class CoinbasePaymentKeyboard(aiogram.types.InlineKeyboardMarkup):
+    def __init__(self, payment_url: str):
+        super().__init__()
+        self.add(payments_buttons.PayWithCoinbaseButton(payment_url))

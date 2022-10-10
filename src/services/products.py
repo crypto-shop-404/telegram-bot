@@ -54,8 +54,9 @@ class Product:
     def create(self):
         with db_api.create_session() as session:
             product = queries.add_product(
-                session, self.name, self.description, self.price, len(self.__units),
-                self.__picture_path and os.path.split(self.__picture_path)[-1], self.category_id, self.subcategory_id
+                session, self.name, self.description, self.price,
+                self.__picture_path and os.path.split(self.__picture_path)[-1],
+                self.category_id, self.subcategory_id
             )
             if self.__picture_path is not None:
                 file_system.move_file(self.__picture_path, config.PRODUCT_PICTURE_PATH)

@@ -1,17 +1,22 @@
+import decimal
+
 import aiogram.types
 from aiogram import filters, dispatcher
 
 import config
+import responses.payments
 import responses.products
 from filters import is_user_in_db
 from keyboards.inline import callback_factories
 from loader import dp
 from services import db_api
 from services.db_api import queries
+from services.payments_apis import coinbase_api
 from states import product_states
 
 
-@dp.message_handler(filters.Text('🛒 Products'), is_user_in_db.IsUserInDB())
+@dp.message_handler(filters.Text('🛒 Products'), filters.ChatTypeFilter(aiogram.types.ChatType.PRIVATE),
+                    is_user_in_db.IsUserInDB())
 async def categories(message: aiogram.types.Message):
     with db_api.create_session() as session:
         category_list = queries.get_all_categories(session)
@@ -19,7 +24,8 @@ async def categories(message: aiogram.types.Message):
 
 
 @dp.callback_query_handler(callback_factories.ProductCallbackFactory().filter(
-    action='buy', category_id='', subcategory_id='', product_id=''), is_user_in_db.IsUserInDB()
+    action='buy', category_id='', subcategory_id='', product_id=''),
+    filters.ChatTypeFilter(aiogram.types.ChatType.PRIVATE), is_user_in_db.IsUserInDB()
 )
 async def categories(query: aiogram.types.CallbackQuery):
     with db_api.create_session() as session:
@@ -28,7 +34,8 @@ async def categories(query: aiogram.types.CallbackQuery):
 
 
 @dp.callback_query_handler(callback_factories.ProductCallbackFactory().filter(
-    action='buy', subcategory_id='', product_id=''), is_user_in_db.IsUserInDB()
+    action='buy', subcategory_id='', product_id=''), filters.ChatTypeFilter(aiogram.types.ChatType.PRIVATE),
+    is_user_in_db.IsUserInDB()
 )
 async def category_items(query: aiogram.types.CallbackQuery, callback_data: dict[str, str]):
     category_id = int(callback_data['category_id'])
@@ -38,7 +45,8 @@ async def category_items(query: aiogram.types.CallbackQuery, callback_data: dict
 
 
 @dp.callback_query_handler(
-    callback_factories.ProductCallbackFactory().filter(action='buy', product_id=''), is_user_in_db.IsUserInDB()
+    callback_factories.ProductCallbackFactory().filter(action='buy', product_id=''),
+    filters.ChatTypeFilter(aiogram.types.ChatType.PRIVATE), is_user_in_db.IsUserInDB()
 )
 async def subcategory_products(query: aiogram.types.CallbackQuery, callback_data: dict[str, str]):
     category_id = int(callback_data['category_id'])
@@ -52,7 +60,8 @@ async def subcategory_products(query: aiogram.types.CallbackQuery, callback_data
 
 
 @dp.callback_query_handler(
-    callback_factories.ProductCallbackFactory().filter(action='buy'), is_user_in_db.IsUserInDB()
+    callback_factories.ProductCallbackFactory().filter(action='buy'),
+    filters.ChatTypeFilter(aiogram.types.ChatType.PRIVATE), is_user_in_db.IsUserInDB()
 )
 async def product_menu(query: aiogram.types.CallbackQuery, callback_data: dict[str, str]):
     product_id = int(callback_data['product_id'])
@@ -67,12 +76,14 @@ async def product_menu(query: aiogram.types.CallbackQuery, callback_data: dict[s
         else:
             product_picture = None
         await responses.products.ProductResponse(
-            query, product, category_id, subcategory_id, product_picture
+            query, product, queries.count_products(session, product.id),
+            category_id, subcategory_id, product_picture
         )
 
 
 @dp.callback_query_handler(
-    callback_factories.BuyProductCallbackFactory().filter(quantity='', payment_method=''), is_user_in_db.IsUserInDB()
+    callback_factories.BuyProductCallbackFactory().filter(quantity='', payment_method=''),
+    filters.ChatTypeFilter(aiogram.types.ChatType.PRIVATE), is_user_in_db.IsUserInDB()
 )
 async def product_quantity(query: aiogram.types.CallbackQuery, callback_data: dict[str, str]):
     await responses.products.ProductQuantityResponse(
@@ -82,18 +93,19 @@ async def product_quantity(query: aiogram.types.CallbackQuery, callback_data: di
 
 @dp.callback_query_handler(
     callback_factories.BuyProductCallbackFactory().filter(quantity='another', payment_method=''),
-    is_user_in_db.IsUserInDB()
+    filters.ChatTypeFilter(aiogram.types.ChatType.PRIVATE), is_user_in_db.IsUserInDB()
 )
 async def own_product_quantity(query: aiogram.types.CallbackQuery, callback_data: dict[str, str]):
     await product_states.EnterProductQuantity.waiting_quantity.set()
-    await dp.current_state().update_data(callback_data)
-    await responses.products.OwnProductQuantityResponse(
+    await dp.current_state().update_data({'callback_data': callback_data})
+    await responses.products.AnotherProductQuantityResponse(
         query, int(callback_data['available_quantity'])
     )
 
 
 @dp.callback_query_handler(
-    callback_factories.BuyProductCallbackFactory().filter(payment_method=''), is_user_in_db.IsUserInDB()
+    callback_factories.BuyProductCallbackFactory().filter(payment_method=''),
+    filters.ChatTypeFilter(aiogram.types.ChatType.PRIVATE), is_user_in_db.IsUserInDB()
 )
 async def product_quantity(query: aiogram.types.CallbackQuery, callback_data: dict[str: str]):
     await responses.products.PaymentMethodResponse(
@@ -101,7 +113,9 @@ async def product_quantity(query: aiogram.types.CallbackQuery, callback_data: di
     )
 
 
-@dp.message_handler(is_user_in_db.IsUserInDB(), state=product_states.EnterProductQuantity.waiting_quantity)
+@dp.message_handler(filters.StateFilter(
+    aiogram.dispatcher, product_states.EnterProductQuantity.waiting_quantity),
+    is_user_in_db.IsUserInDB())
 async def another_product_quantity(message: aiogram.types.Message, state: dispatcher.FSMContext):
     quantity = message.text
     callback_data = (await state.get_data())['callback_data']
@@ -115,30 +129,64 @@ async def another_product_quantity(message: aiogram.types.Message, state: dispat
 
 
 @dp.callback_query_handler(callback_factories.BuyProductCallbackFactory().filter(payment_method='qiwi'),
-                           is_user_in_db.IsUserInDB())
-async def qiwi(query: aiogram.types.CallbackQuery):
+                           filters.ChatTypeFilter(aiogram.types.ChatType.PRIVATE), is_user_in_db.IsUserInDB())
+async def pay_with_qiwi(query: aiogram.types.CallbackQuery):
     await query.message.answer('🚧 Under Development')
 
 
 @dp.callback_query_handler(callback_factories.BuyProductCallbackFactory().filter(payment_method='yoomoney'),
-                           is_user_in_db.IsUserInDB())
-async def yoomoney(query: aiogram.types.CallbackQuery):
+                           filters.ChatTypeFilter(aiogram.types.ChatType.PRIVATE), is_user_in_db.IsUserInDB())
+async def pay_with_yoomoney(query: aiogram.types.CallbackQuery):
     await query.message.answer('🚧 Under Development')
 
 
 @dp.callback_query_handler(callback_factories.BuyProductCallbackFactory().filter(payment_method='minerlock'),
-                           is_user_in_db.IsUserInDB())
-async def minerlock(query: aiogram.types.CallbackQuery):
+                           filters.ChatTypeFilter(aiogram.types.ChatType.PRIVATE), is_user_in_db.IsUserInDB())
+async def pay_with_minerlock(query: aiogram.types.CallbackQuery):
     await query.message.answer('🚧 Under Development')
 
 
 @dp.callback_query_handler(callback_factories.BuyProductCallbackFactory().filter(payment_method='coinpayments'),
-                           is_user_in_db.IsUserInDB())
-async def coinpayments(query: aiogram.types.CallbackQuery):
+                           filters.ChatTypeFilter(aiogram.types.ChatType.PRIVATE), is_user_in_db.IsUserInDB())
+async def pay_with_coinpayments(query: aiogram.types.CallbackQuery):
     await query.message.answer('🚧 Under Development')
 
 
 @dp.callback_query_handler(callback_factories.BuyProductCallbackFactory().filter(payment_method='coinbase'),
-                           is_user_in_db.IsUserInDB())
-async def coinbase(query: aiogram.types.CallbackQuery):
-    await query.message.answer('🚧 Under Development')
+                           filters.ChatTypeFilter(aiogram.types.ChatType.PRIVATE), is_user_in_db.IsUserInDB())
+async def pay_with_coinbase(query: aiogram.types.CallbackQuery, callback_data: dict[str: str]):
+    with db_api.create_session() as session:
+        product = queries.get_product(session, int(callback_data['product_id']))
+        quantity = int(callback_data['quantity'])
+        amount = float(quantity * decimal.Decimal(str(product.price)))
+        api = coinbase_api.CoinbaseAPI(config.CoinbaseSettings().api_key)
+        charge = api.create_charge(product.name, product.price, product.description)
+        payment_message = await responses.payments.CoinbasePaymentLinkResponse(
+            query, amount, quantity, charge['hosted_url'])
+        if api.check_payment(charge):
+            sale_id = queries.add_sale(
+                session, int(query.from_user.id), query.from_user.username,
+                product.id, amount, quantity, payment_type='coinbase').id
+            product_units = queries.get_not_sold_product_units(session, product.id, quantity)
+            for product_unit in product_units:
+                queries.add_sold_product_unit(session, sale_id, product_unit.id)
+        else:
+            await responses.payments.FailedPurchaseResponse(payment_message)
+
+
+@dp.callback_query_handler(callback_factories.BuyProductCallbackFactory().filter(payment_method='balance'),
+                           filters.ChatTypeFilter(aiogram.types.ChatType.PRIVATE), is_user_in_db.IsUserInDB())
+async def pay_with_balance(query: aiogram.types.CallbackQuery, callback_data: dict[str: str]):
+    with db_api.create_session() as session:
+        product = queries.get_product(session, int(callback_data['product_id']))
+        quantity = int(callback_data['quantity'])
+        amount = float(quantity * decimal.Decimal(str(product.price)))
+        if queries.get_user(session, int(query.from_user.id)).balance >= amount:
+            sale_id = queries.add_sale(
+                session, query.from_user.id, query.from_user.username,
+                product.id, amount, quantity, payment_type='balance').id
+            product_units = queries.get_not_sold_product_units(session, product.id, quantity)
+            for product_unit in product_units:
+                queries.add_sold_product_unit(session, sale_id, product_unit.id)
+        else:
+            await responses.payments.NotEnoughBalanceResponse(query)

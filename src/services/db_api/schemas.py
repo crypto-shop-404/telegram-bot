@@ -53,7 +53,6 @@ class Product(BaseModel):
     description = sqlalchemy.Column(sqlalchemy.Text(), nullable=False)
     picture = sqlalchemy.Column(sqlalchemy.String(255))
     price = sqlalchemy.Column(sqlalchemy.Float(), nullable=False)
-    quantity = sqlalchemy.Column(sqlalchemy.Integer(), nullable=False)
 
     product_unit = orm.relationship('ProductUnit', backref='product')
 

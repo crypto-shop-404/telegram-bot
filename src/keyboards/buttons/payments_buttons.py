@@ -67,3 +67,8 @@ class ManageCoinPaymentsButton(aiogram.types.KeyboardButton):
 class ManageCoinbaseButton(aiogram.types.KeyboardButton):
     def __init__(self):
         super().__init__('🌐 Coinbase')
+
+
+class PayWithCoinbaseButton(aiogram.types.InlineKeyboardButton):
+    def __init__(self, payment_url: str):
+        super().__init__('🧾 Pay', url=payment_url)
