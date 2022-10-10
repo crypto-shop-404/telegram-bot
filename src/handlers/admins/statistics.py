@@ -1,9 +1,9 @@
 import aiogram
+from aiogram import filters
 
 import responses.statistics
-from loader import dp
-from aiogram import filters
 from filters import is_user_in_db, is_admin
+from loader import dp
 from services import db_api
 from services.db_api import queries
 
@@ -23,7 +23,7 @@ async def general_statistics(message: aiogram.types.Message):
             queries.count_sold_product_units(session),
             queries.get_products_sold_units_quantity(session),
             queries.get_buyers(session)
-    )
+        )
 
 
 @dp.message_handler(filters.Text('📆 Daily'), is_user_in_db.IsUserInDB(), is_admin.IsUserAdmin())

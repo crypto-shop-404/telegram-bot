@@ -34,7 +34,6 @@ class CoinbaseAPI(base_payments_api.BasePaymentAPI):
     def check(self) -> bool:
         try:
             self.client.get()
-        except error.AuthenticationError:
+        except (error.AuthenticationError, error.ResourceNotFoundError):
             return False
-        except error.ResourceNotFoundError:
-            return True
+        return True

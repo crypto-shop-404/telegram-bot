@@ -21,6 +21,7 @@ dotenv.load_dotenv()
 def set_env_var(key: str, value: str) -> None:
     dotenv_file = dotenv.find_dotenv()
     dotenv.set_key(dotenv_file, key, value, quote_mode="never")
+    dotenv.load_dotenv()
 
 
 class TOMLSettings(collections.UserDict):
