@@ -22,7 +22,7 @@ class NewUserNotification(BaseNotification):
                 '📱 New user\n'
                 '➖➖➖➖➖➖➖➖➖➖\n' +
                 ('🙍‍♂ Name: '
-                 f'{self.__username}\n' if self.__username else '') +
+                 f'@{self.__username}\n' if self.__username else '') +
                 f'🆔 ID: {self.__user_id}'
         )
         for user_id in AppSettings().admins_id:
