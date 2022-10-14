@@ -7,13 +7,13 @@ import dotenv
 import pydantic
 import toml
 
-
 ROOT_DIR = pathlib.Path(os.path.abspath('..'))
 DATA_PATH = ROOT_DIR / 'data'
 BACKUP_PATH = ROOT_DIR / 'backups'
-PRODUCT_PICTURE_PATH = DATA_PATH / 'products' / 'pictures'
-PRODUCT_UNITS_PATH = DATA_PATH / 'products' / 'units'
-PENDING_PATH = DATA_PATH / 'pending'
+PRODUCT_PATH = DATA_PATH / 'products'
+PRODUCT_PICTURE_PATH = PRODUCT_PATH / 'pictures'
+PRODUCT_UNITS_PATH = PRODUCT_PATH / 'units'
+PENDING_DIR_PATH = DATA_PATH / 'pending'
 
 dotenv.load_dotenv()
 

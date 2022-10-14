@@ -50,9 +50,10 @@ class Product(BaseModel):
         sqlalchemy.ForeignKey('subcategory.id', ondelete='CASCADE')
     )
     name = sqlalchemy.Column(sqlalchemy.String(255), nullable=False)
-    description = sqlalchemy.Column(sqlalchemy.Text(), nullable=False)
+    description = sqlalchemy.Column(sqlalchemy.Text, nullable=False)
     picture = sqlalchemy.Column(sqlalchemy.String(255))
-    price = sqlalchemy.Column(sqlalchemy.Float(), nullable=False)
+    price = sqlalchemy.Column(sqlalchemy.Float, nullable=False)
+    quantity = sqlalchemy.Column(sqlalchemy.Integer, default=0)
 
     product_unit = orm.relationship('ProductUnit', backref='product')
 

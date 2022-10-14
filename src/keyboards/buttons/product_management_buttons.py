@@ -120,7 +120,7 @@ class DeleteAllProductUnits(aiogram.types.InlineKeyboardButton):
         super().__init__(
             text='🗑 Remove Data', callback_data=callback_factories.ProductCallbackFactory().new(
                 category_id=category_id, subcategory_id=subcategory_id or '',
-                product_id=product_id, action='delete_unit'
+                product_id=product_id, action='delete_units'
             )
         )
 

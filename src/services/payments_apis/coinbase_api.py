@@ -20,7 +20,7 @@ class CoinbaseAPI(base_payments_api.BasePaymentAPI):
             },
             "pricing_type": "fixed_price"
         }
-        return self.client.charge.create(**charge_info)
+        return self.client.charge.create_product_unit(**charge_info)
 
     @staticmethod
     async def check_payment(payment: charge.Charge) -> bool:

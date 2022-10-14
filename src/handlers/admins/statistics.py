@@ -2,6 +2,7 @@ import aiogram
 from aiogram import filters
 
 import responses.statistics
+from common import models
 from filters import is_user_in_db, is_admin
 from loader import dp
 from services import db_api
@@ -16,13 +17,21 @@ async def statistics(message: aiogram.types.Message):
 @dp.message_handler(filters.Text('📊 General'), is_user_in_db.IsUserInDB(), is_admin.IsUserAdmin())
 async def general_statistics(message: aiogram.types.Message):
     with db_api.create_session() as session:
+        buyers = []
+        for telegram_id, username, quantity, amount in queries.get_buyers(session):
+            buyer: models.User = {
+                'telegram_id': telegram_id, 'username': username,
+                'purchase_number': quantity, 'orders_amount': amount
+            }
+            buyers.append(buyer)
+
         await responses.statistics.StatisticsResponse(
             message,
             queries.count_users(session),
             queries.get_total_orders_amount(session),
-            queries.count_sold_product_units(session),
-            queries.get_products_sold_units_quantity(session),
-            queries.get_buyers(session)
+            queries.count_purchases(session),
+            queries.get_purchases(session),
+            buyers
         )
 
 

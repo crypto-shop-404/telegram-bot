@@ -38,13 +38,13 @@ def add_subcategories(session: orm.Session, subcategories: list[str], category_i
 
 
 def add_product(session: orm.Session, name: str, description: str,
-                price: float, picture: str, category_id: int,
+                price: float, quantity: int, picture: str, category_id: int,
                 subcategory_id: int = None) -> schemas.Product:
     product = schemas.Product(
         category_id=category_id,
         subcategory_id=subcategory_id,
         name=name, description=description,
-        picture=picture, price=price
+        picture=picture, price=price, quantity=quantity
     )
     session.add(product)
     session.flush()
@@ -108,9 +108,14 @@ def get_users(session: orm.Session, limit: int = None, offset: int = None,
     return session.scalars(statement).all()
 
 
-def get_buyers(session: orm.Session):
-    statement = sqlalchemy.select(schemas.User).join(schemas.Sale)
-    return session.scalars(statement).all()
+def get_buyers(session: orm.Session) -> list[tuple[int, str | None, int, float]]:
+    statement = sqlalchemy.select(
+        schemas.User.telegram_id, schemas.User.username,
+        sqlalchemy.func.sum(schemas.Sale.quantity),
+        sqlalchemy.func.sum(schemas.Sale.amount)
+    ).join(schemas.Sale)
+    statement = statement.group_by(schemas.User.id)
+    return session.execute(statement).all()
 
 
 def get_users_telegram_id(session: orm.Session) -> list[int]:
@@ -205,11 +210,14 @@ def get_not_sold_product_units(session: orm.Session, product_id: int,
     return session.scalars(statement).all()
 
 
-def get_products_sold_units_quantity(session: orm.Session) -> list[tuple[str, int]]:
+def get_purchases(session: orm.Session, user_id: int = None) -> list[tuple[str, int, float]]:
     statement = sqlalchemy.select(
         schemas.Product.name,
-        sqlalchemy.func.count(schemas.Sale.quantity)
+        sqlalchemy.func.count(schemas.Sale.quantity),
+        sqlalchemy.func.count(schemas.Sale.amount)
     ).join(schemas.Sale).group_by(schemas.Sale.product_id)
+    if user_id is not None:
+        statement = statement.having(schemas.Sale.user_id == user_id)
     return session.execute(statement).all()
 
 
@@ -344,6 +352,20 @@ def edit_product_price(session: orm.Session, product_id: int, price: float) -> s
     return product
 
 
+def edit_product_quantity(session: orm.Session, product_id: int, quantity_delta: int) -> schemas.Product | None:
+    product = get_product(session, product_id)
+    if product is not None:
+        product.quantity += quantity_delta
+    return product
+
+
+def reset_product_quantity(session: orm.Session, product_id: int) -> schemas.Product | None:
+    product = get_product(session, product_id)
+    if product is not None:
+        product.quantity = 0
+    return product
+
+
 def edit_faq(session: orm.Session, faq_value: str):
     faq = get_faq(session)
     if faq is None:
@@ -393,7 +415,7 @@ def delete_subcategory(session: orm.Session, subcategory_id: int) -> None:
 
 
 def delete_product(session: orm.Session, product_id: int) -> None:
-    session.execute(sqlalchemy.delete(schemas.User).filter_by(id=product_id))
+    session.execute(sqlalchemy.delete(schemas.Product).filter_by(id=product_id))
 
 
 def delete_product_unit(session: orm.Session, product_unit_id: int) -> None:
@@ -415,13 +437,6 @@ def delete_support_request(session: orm.Session, support_request_id: int) -> Non
     session.execute(sqlalchemy.delete(schemas.SupportRequest).filter_by(id=support_request_id))
 
 
-def count_products(session: orm.Session, product_id: int) -> int:
-    statement = sqlalchemy.select(
-        sqlalchemy.func.count(schemas.ProductUnit.id)
-    ).filter_by(product_id=product_id, sale_id=None)
-    return session.scalar(statement)
-
-
 def count_users(session: orm.Session) -> int:
     return session.scalar(sqlalchemy.select(sqlalchemy.func.count(schemas.User.id)))
 
@@ -433,11 +448,15 @@ def count_user_orders(session: orm.Session, user_id: int) -> int:
     return session.scalar(statement)
 
 
-def count_sold_product_units(session: orm.Session) -> bool:
-    statement = sqlalchemy.select(sqlalchemy.func.count(schemas.ProductUnit.id).filter(
-        schemas.ProductUnit.sale_id is not None
-    ))
-    return session.scalar(statement)
+def count_purchases(session: orm.Session) -> int:
+    statement = sqlalchemy.select(sqlalchemy.func.sum(schemas.Sale.quantity))
+    return session.scalar(statement) or 0
+
+
+def count_user_purchases(session: orm.Session, user_id: int) -> int:
+    statement = sqlalchemy.select(sqlalchemy.func.sum(schemas.Sale.quantity))
+    statement = statement.filter(schemas.Sale.id == user_id)
+    return session.scalar(statement) or 0
 
 
 def count_open_support_requests(session: orm.Session) -> int:
@@ -445,8 +464,13 @@ def count_open_support_requests(session: orm.Session) -> int:
     return session.scalar(statement)
 
 
-def get_total_orders_amount(session: orm.Session) -> bool:
+def get_total_orders_amount(session: orm.Session) -> float:
     return session.scalar(sqlalchemy.select(sqlalchemy.func.sum(schemas.Sale.amount))) or 0
+
+
+def get_user_orders_amount(session: orm.Session, user_id: int):
+    statement = sqlalchemy.select(sqlalchemy.func.sum(schemas.Sale.amount))
+    return session.scalar(statement.filter(schemas.Sale.id == user_id)) or 0
 
 
 def get_total_balance(session: orm.Session) -> float:

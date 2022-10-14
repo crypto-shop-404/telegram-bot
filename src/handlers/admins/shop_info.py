@@ -21,7 +21,7 @@ async def faq_handler(message: aiogram.types.Message):
     with db_api.create_session() as session:
         faq = queries.get_faq(session)
         await responses.shop_information.FAQResponse(
-            message, faq.value if faq is not None else 'Faq'
+            message, faq.value if faq is not None else 'Faq', True
         )
 
 
@@ -30,7 +30,7 @@ async def rules_handler(message: aiogram.types.Message):
     with db_api.create_session() as session:
         rules = queries.get_rules(session)
         await responses.shop_information.RulesResponse(
-            message, rules.value if rules is not None else 'Rules'
+            message, rules.value if rules is not None else 'Rules', True
         )
 
 

@@ -9,7 +9,7 @@ import responses.products
 from filters import is_user_in_db
 from keyboards.inline import callback_factories
 from loader import dp
-from services import db_api
+from services import db_api, notifications
 from services.db_api import queries
 from services.payments_apis import coinbase_api
 from states import product_states
@@ -76,7 +76,7 @@ async def product_menu(query: aiogram.types.CallbackQuery, callback_data: dict[s
         else:
             product_picture = None
         await responses.products.ProductResponse(
-            query, product, queries.count_products(session, product.id),
+            query, product, product.quantity,
             category_id, subcategory_id, product_picture
         )
 
@@ -113,9 +113,7 @@ async def product_quantity(query: aiogram.types.CallbackQuery, callback_data: di
     )
 
 
-@dp.message_handler(filters.StateFilter(
-    aiogram.dispatcher, product_states.EnterProductQuantity.waiting_quantity),
-    is_user_in_db.IsUserInDB())
+@dp.message_handler(is_user_in_db.IsUserInDB(), state=product_states.EnterProductQuantity.waiting_quantity)
 async def another_product_quantity(message: aiogram.types.Message, state: dispatcher.FSMContext):
     quantity = message.text
     callback_data = (await state.get_data())['callback_data']
@@ -156,6 +154,7 @@ async def pay_with_coinpayments(query: aiogram.types.CallbackQuery):
                            filters.ChatTypeFilter(aiogram.types.ChatType.PRIVATE), is_user_in_db.IsUserInDB())
 async def pay_with_coinbase(query: aiogram.types.CallbackQuery, callback_data: dict[str: str]):
     with db_api.create_session() as session:
+        user = queries.get_user(query.from_user.id)
         product = queries.get_product(session, int(callback_data['product_id']))
         quantity = int(callback_data['quantity'])
         amount = float(quantity * decimal.Decimal(str(product.price)))
@@ -165,9 +164,10 @@ async def pay_with_coinbase(query: aiogram.types.CallbackQuery, callback_data: d
             query, amount, quantity, charge['hosted_url'])
         if api.check_payment(charge):
             sale_id = queries.add_sale(
-                session, int(query.from_user.id), query.from_user.username,
+                session, user.id, user.username,
                 product.id, amount, quantity, payment_type='coinbase').id
             product_units = queries.get_not_sold_product_units(session, product.id, quantity)
+            queries.edit_product_quantity(session, product.id, -quantity)
             for product_unit in product_units:
                 queries.add_sold_product_unit(session, sale_id, product_unit.id)
         else:
@@ -181,12 +181,21 @@ async def pay_with_balance(query: aiogram.types.CallbackQuery, callback_data: di
         product = queries.get_product(session, int(callback_data['product_id']))
         quantity = int(callback_data['quantity'])
         amount = float(quantity * decimal.Decimal(str(product.price)))
-        if queries.get_user(session, int(query.from_user.id)).balance >= amount:
-            sale_id = queries.add_sale(
-                session, query.from_user.id, query.from_user.username,
-                product.id, amount, quantity, payment_type='balance').id
+        if queries.get_user(session, telegram_id=int(query.from_user.id)).balance >= amount:
             product_units = queries.get_not_sold_product_units(session, product.id, quantity)
+            user = queries.get_user(session, telegram_id=query.from_user.id)
+            quantity = len(product_units)
+            sale = queries.add_sale(
+                session, user.id, user.username,
+                product.id, amount, quantity, payment_type='balance'
+            )
+            queries.edit_product_quantity(session, product.id, -quantity)
+            queries.top_up_balance(session, product.id, -decimal.Decimal(str(amount)))
             for product_unit in product_units:
-                queries.add_sold_product_unit(session, sale_id, product_unit.id)
+                queries.add_sold_product_unit(session, sale.id, product_unit.id)
+            await responses.payments.PurchaseInformationResponse(
+                query, sale.id, product.name, quantity, amount, product_units
+            )
+            await notifications.NewPurchaseNotification(sale, '💲 Balance', product.name, product_units).send()
         else:
             await responses.payments.NotEnoughBalanceResponse(query)

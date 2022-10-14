@@ -100,7 +100,8 @@ class ProductUnitKeyboard(aiogram.types.InlineKeyboardMarkup):
         )
         self.row(navigation_buttons.InlineBackButton(
             callback_query=callback_factories.ProductCallbackFactory().new(
-                action='manage', category_id=category_id,
-                subcategory_id=subcategory_id or '', product_id=product_id
+                category_id=category_id,
+                subcategory_id=subcategory_id or '', product_id=product_id,
+                action='units'
             )
         ))

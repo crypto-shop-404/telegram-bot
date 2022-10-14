@@ -4,8 +4,8 @@ from aiogram.dispatcher import filters
 
 import responses.main_menu
 import responses.start
-from loader import dp
 from filters import is_user_in_db, is_admin
+from loader import dp
 from services import db_api, notifications
 from services.db_api import queries
 

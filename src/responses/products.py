@@ -2,6 +2,7 @@ import typing
 
 import aiogram.types
 
+from keyboards.buttons import navigation_buttons
 from keyboards.inline import product_keyboards, callback_factories, payments_keyboards
 from responses import base
 from services.db_api import schemas
@@ -20,6 +21,9 @@ class CategoriesResponses(base.BaseResponse):
             else '😔 Oh, there is nothing here (')
         if isinstance(self.__update, aiogram.types.CallbackQuery):
             await self.__update.answer()
+            if len(self.__update.message.photo) > 0:
+                await self.__update.message.delete()
+                return await self.__update.message.answer(message_text, reply_markup=self.__keyboard)
             return await self.__update.message.edit_text(message_text, reply_markup=self.__keyboard)
         elif isinstance(self.__update, aiogram.types.Message):
             return await self.__update.answer(message_text, reply_markup=self.__keyboard)
@@ -39,6 +43,9 @@ class CategoryItemsResponse(base.BaseResponse):
         )
         if isinstance(self.__update, aiogram.types.CallbackQuery):
             await self.__update.answer()
+            if len(self.__update.message.photo) > 0:
+                await self.__update.message.delete()
+                return await self.__update.message.answer(message_text, reply_markup=self.__keyboard)
             return await self.__update.message.edit_text(message_text, reply_markup=self.__keyboard)
         elif isinstance(self.__update, aiogram.types.Message):
             return await self.__update.answer(message_text, reply_markup=self.__keyboard)
@@ -58,6 +65,9 @@ class SubcategoryProductsResponse(base.BaseResponse):
         )
         if isinstance(self.__update, aiogram.types.CallbackQuery):
             await self.__update.answer()
+            if len(self.__update.message.photo) > 0:
+                await self.__update.message.delete()
+                return await self.__update.message.answer(message_text, reply_markup=self.__keyboard)
             return await self.__update.message.edit_text(message_text, reply_markup=self.__keyboard)
         elif isinstance(self.__update, aiogram.types.Message):
             return await self.__update.answer(message_text, reply_markup=self.__keyboard)
@@ -102,9 +112,13 @@ class ProductQuantityResponse(base.BaseResponse):
         self.__keyboard = product_keyboards.ProductQuantityKeyboard(product_id, available_quantity)
 
     async def _send_response(self) -> aiogram.types.Message:
+        text = '🛒 Enter the required quantity of the product'
         await self.__query.answer()
+        if len(self.__query.message.photo) > 0:
+            await self.__query.message.delete()
+            return await self.__query.message.answer(text, reply_markup=self.__keyboard)
         return await self.__query.message.edit_text(
-            '🛒 Enter the required quantity of the product', reply_markup=self.__keyboard
+            text, reply_markup=self.__keyboard
         )
 
 
@@ -139,6 +153,10 @@ class PaymentMethodResponse(base.BaseResponse):
         self.__keyboard = payments_keyboards.PaymentMethodsKeyboard(
             callback_data, callback_factories.BuyProductCallbackFactory(),
             is_balance=True, crypto_payments=crypto_payments
+        )
+        self.__keyboard.add(navigation_buttons.InlineBackButton(
+            callback_factories.BuyProductCallbackFactory().new(
+                **(callback_data | {'quantity': '', 'payment_method': ''})))
         )
 
     async def _send_response(self) -> aiogram.types.Message:

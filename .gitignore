@@ -15,7 +15,7 @@ __pycache__/
 .env
 
 # Developing
-test.py
+src/test.py
 
 # Distribution / packaging
 .Python

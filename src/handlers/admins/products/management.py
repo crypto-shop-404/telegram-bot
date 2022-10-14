@@ -3,13 +3,14 @@ from aiogram import filters
 
 import responses.main_menu
 import responses.product_management
+from filters import is_admin, is_user_in_db
 from keyboards.inline import callback_factories
 from loader import dp
 from services import db_api
 from services.db_api import queries
 
 
-@dp.message_handler(filters.Text('📝 Products Management'))
+@dp.message_handler(filters.Text('📝 Products Management'), is_admin.IsUserAdmin(), is_user_in_db.IsUserInDB())
 async def product_categories(message: aiogram.types.Message):
     with db_api.create_session() as session:
         categories = queries.get_all_categories(session)
@@ -17,7 +18,8 @@ async def product_categories(message: aiogram.types.Message):
 
 
 @dp.callback_query_handler(callback_factories.ProductCallbackFactory().filter(
-    category_id='', subcategory_id='', product_id='', action='manage')
+    category_id='', subcategory_id='', product_id='', action='manage'),
+    is_admin.IsUserAdmin(), is_user_in_db.IsUserInDB()
 )
 async def product_categories(query: aiogram.types.CallbackQuery):
     with db_api.create_session() as session:
@@ -26,7 +28,9 @@ async def product_categories(query: aiogram.types.CallbackQuery):
 
 
 @dp.callback_query_handler(
-    callback_factories.ProductCallbackFactory().filter(subcategory_id='', product_id='', action='manage'))
+    callback_factories.ProductCallbackFactory().filter(subcategory_id='', product_id='', action='manage'),
+    is_admin.IsUserAdmin(), is_user_in_db.IsUserInDB()
+)
 async def category_items(query: aiogram.types.CallbackQuery, callback_data: dict[str, str]):
     category_id = int(callback_data['category_id'])
     with db_api.create_session() as session:
@@ -36,7 +40,7 @@ async def category_items(query: aiogram.types.CallbackQuery, callback_data: dict
 
 @dp.callback_query_handler(
     callback_factories.ProductCallbackFactory().filter(
-        product_id='', action='manage')
+        product_id='', action='manage'), is_admin.IsUserAdmin(), is_user_in_db.IsUserInDB()
 )
 async def subcategory_products(query: aiogram.types, callback_data: dict[str, str]):
     subcategory_id = int(callback_data['subcategory_id'])
@@ -47,9 +51,8 @@ async def subcategory_products(query: aiogram.types, callback_data: dict[str, st
         )
 
 
-@dp.callback_query_handler(callback_factories.ProductCallbackFactory().filter(
-    action='manage',
-))
+@dp.callback_query_handler(callback_factories.ProductCallbackFactory().filter(action='manage'),
+                           is_admin.IsUserAdmin(), is_user_in_db.IsUserInDB())
 async def product_menu(query: aiogram.types.CallbackQuery, callback_data: dict[str, str]):
     category_id, subcategory_id = callback_data['category_id'], callback_data['subcategory_id']
     category_id = int(category_id) if category_id != '' else None

@@ -14,20 +14,20 @@ class ShopInformationResponse(base.BaseResponse):
 
 
 class FAQResponse(base.BaseResponse):
-    def __init__(self, message: aiogram.types.Message, faq: str):
+    def __init__(self, message: aiogram.types.Message, faq: str, is_admin: bool = False):
         self.__message = message
         self.__faq = faq
-        self.__keyboard = shop_information_keyboards.EditFAQKeyboard()
+        self.__keyboard = shop_information_keyboards.EditFAQKeyboard() if is_admin else None
 
     async def _send_response(self):
         await self.__message.answer(self.__faq, reply_markup=self.__keyboard)
 
 
 class RulesResponse(base.BaseResponse):
-    def __init__(self, message: aiogram.types.Message, rules: str):
+    def __init__(self, message: aiogram.types.Message, rules: str, is_admin: bool = False):
         self.__message = message
         self.__rules = rules
-        self.__keyboard = shop_information_keyboards.EditRulesKeyboard()
+        self.__keyboard = shop_information_keyboards.EditRulesKeyboard() if is_admin else None
 
     async def _send_response(self):
         await self.__message.answer(self.__rules, reply_markup=self.__keyboard)

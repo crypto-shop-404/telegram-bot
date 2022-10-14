@@ -4,6 +4,7 @@ import logging
 import aiogram
 from aiogram import executor
 
+import config
 import handlers
 import middlewares
 import tasks
@@ -24,6 +25,8 @@ async def set_default_commands(dispatcher: aiogram.Dispatcher):
 
 
 async def on_startup(dispatcher):
+    config.PRODUCT_UNITS_PATH.mkdir(parents=True, exist_ok=True)
+    config.PRODUCT_PICTURE_PATH.mkdir(parents=True, exist_ok=True)
     tasks.setup_tasks()
     db_api.setup_database()
     middlewares.setup_middlewares(dispatcher)

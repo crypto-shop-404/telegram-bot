@@ -19,6 +19,11 @@ class BuyProductCallbackFactory(callback_data.CallbackData):
         super().__init__('buy_product', 'product_id', 'available_quantity', 'quantity', 'payment_method')
 
 
+class TopUpBalanceCallbackFactory(callback_data.CallbackData):
+    def __init__(self):
+        super().__init__('top_up_balance', 'amount', 'payment_method')
+
+
 class CategoriesCallbackFactory(callback_data.CallbackData):
     def __init__(self):
         super().__init__('categories', 'action')

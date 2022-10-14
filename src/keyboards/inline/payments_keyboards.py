@@ -1,6 +1,6 @@
 import aiogram.utils.callback_data
 
-from keyboards.buttons import payments_buttons, navigation_buttons
+from keyboards.buttons import payments_buttons
 from repositories import payments_apis_repository
 
 
@@ -21,9 +21,6 @@ class PaymentMethodsKeyboard(aiogram.types.InlineKeyboardMarkup):
             self.add(buttons[name])
         if is_balance:
             self.add(payments_buttons.BalanceButton(callback_data, callback_factory))
-        self.add(navigation_buttons.InlineBackButton(
-            callback_factory.new(**(callback_data | {'quantity': '', 'payment_method': ''})))
-        )
 
 
 class CoinbasePaymentKeyboard(aiogram.types.InlineKeyboardMarkup):

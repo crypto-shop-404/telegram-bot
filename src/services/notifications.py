@@ -1,5 +1,8 @@
 import abc
 
+import aiogram
+import aiogram.utils.exceptions
+
 import config
 from config import AppSettings
 from loader import bot
@@ -26,36 +29,49 @@ class NewUserNotification(BaseNotification):
                 f'🆔 ID: {self.__user_id}'
         )
         for user_id in AppSettings().admins_id:
-            await bot.send_message(user_id, text)
+            try:
+                await bot.send_message(user_id, text)
+            except (aiogram.exceptions.BotBlocked, aiogram.exceptions.ChatNotFound):
+                continue
 
 
 class NewPurchaseNotification(BaseNotification):
-    def __init__(self, sale: schemas.Sale, payment_method: str):
+    def __init__(self, sale: schemas.Sale, payment_method: str,
+                 product_name: str, product_units: list[schemas.ProductUnit]):
         self.__sale = sale
+        self.__product_units = product_units
+        self.__product_name = product_name
         self.__payment_method = payment_method
 
     async def send(self):
         text = self.__get_text()
-        product_unit_type = self.__sale.product_unit.type
-        product_unit_content = self.__sale.product_unit.content
-        if product_unit_type == 'document':
-            for user_id in AppSettings().admins_id:
-                await bot.send_message(user_id, text)
-                await bot.send_document(config.PRODUCT_UNITS_PATH / product_unit_content)
-        elif product_unit_content == 'text':
-            text += self.__sale.product_unit.content
-            for user_id in AppSettings().admins_id:
-                await bot.send_message(user_id, text)
+        media_groups = [aiogram.types.MediaGroup()]
+        admins_id = AppSettings().admins_id
+        for admin_id in admins_id:
+            bot.send_message(admin_id, text)
+        for i, unit in enumerate(self.__product_units):
+            if unit.type != 'document':
+                continue
+            path = config.PRODUCT_UNITS_PATH / unit.content
+            media_groups[-1].attach_document(aiogram.types.InputFile(path))
+            if (i + 1) % 10 == 0:
+                media_groups.append(aiogram.types.MediaGroup())
+        for admin_id in admins_id:
+            try:
+                for media_group in media_groups:
+                    await bot.send_media_group(admin_id, media_group)
+            except (aiogram.exceptions.BotBlocked, aiogram.exceptions.ChatNotFound):
+                continue
 
     def __get_text(self):
-        return (
+        text = (
                 '🛒 New purchase\n'
                 '➖➖➖➖➖➖➖➖➖➖\n'
                 f'🆔 Order Number: {self.__sale.id}\n' +
                 (f'🙍‍♂ Customer: @{self.__sale.username}\n' if self.__sale.username is not None else '') +
                 f'#️⃣ User ID: {self.__sale.user_id}\n'
                 '➖➖➖➖➖➖➖➖➖➖\n'
-                f'📙 Product Name: {self.__sale.product_name}\n'
+                f'📙 Product Name: {self.__product_name}\n'
                 f'📦 Quantity: {self.__sale.quantity} pc(s).\n'
                 f'💰 Amount of purchase: ${self.__sale.amount}.\n'
                 '➖➖➖➖➖➖➖➖➖➖\n'
@@ -63,6 +79,10 @@ class NewPurchaseNotification(BaseNotification):
                 '➖➖➖➖➖➖➖➖➖➖\n'
                 '📱 Data:\n\n'
         )
+        for product_unit in self.__product_units:
+            if product_unit.type == 'text':
+                text += f'{product_unit.content}\n'
+        return text
 
 
 class NewSupportRequestNotification(BaseNotification):
@@ -83,7 +103,10 @@ class NewSupportRequestNotification(BaseNotification):
                 f'{self.__support_request.issue}'
         )
         for user_id in AppSettings().admins_id:
-            await bot.send_message(user_id, text)
+            try:
+                await bot.send_message(user_id, text)
+            except (aiogram.exceptions.BotBlocked, aiogram.exceptions.ChatNotFound):
+                continue
 
 
 class AnsweredSupportRequestNotification(BaseNotification):
@@ -112,4 +135,7 @@ class ErrorNotification(BaseNotification):
             f" The bot will restart automatically."
         )
         for user_id in AppSettings().admins_id:
-            await bot.send_message(user_id, text)
+            try:
+                await bot.send_message(user_id, text)
+            except (aiogram.exceptions.BotBlocked, aiogram.exceptions.ChatNotFound):
+                continue
