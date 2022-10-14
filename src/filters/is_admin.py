@@ -1,7 +1,7 @@
 import aiogram.types
 from aiogram import filters
 
-from src import config
+import config
 
 
 class IsUserAdmin(filters.BoundFilter):
