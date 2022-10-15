@@ -48,7 +48,7 @@ class NewPurchaseNotification(BaseNotification):
         media_groups = []
         admins_id = AppSettings().admins_id
         for admin_id in admins_id:
-            bot.send_message(admin_id, text)
+            await bot.send_message(admin_id, text)
         for i, unit in enumerate(self.__product_units):
             if unit.type != 'document':
                 continue
