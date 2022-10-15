@@ -196,6 +196,8 @@ async def pay_with_balance(query: aiogram.types.CallbackQuery, callback_data: di
             await responses.payments.PurchaseInformationResponse(
                 query, sale.id, product.name, quantity, amount, product_units
             )
+            session.expunge_all()
+            session.commit()
             await notifications.NewPurchaseNotification(sale, '💲 Balance', product.name, product_units).send()
         else:
             await responses.payments.NotEnoughBalanceResponse(query)
