@@ -65,10 +65,11 @@ async def add_product_unit(message: aiogram.types.Message, state: dispatcher.FSM
                 pending_dir_path=pending_dir)
         )
     elif message.text is not None:
-        units.append(product_services.ProductUnitLifeCycle(
-            product_id, product_unit_content=message.text,
-            product_unit_type='text'
-        ))
+        for unit in message.text.split('\n'):
+            units.append(product_services.ProductUnitLifeCycle(
+                product_id, product_unit_content=unit,
+                product_unit_type='text'
+            ))
     await state.update_data({'units': units})
     await responses.product_management.SuccessUnitAddingResponse(message)
 

@@ -107,6 +107,7 @@ async def add_product_unit(message: aiogram.types.Message, state: dispatcher.FSM
         await message.photo[-1].download(destination_file=product_data_file)
         product.add_product_unit(product_data_file.name, 'document', pending_dir)
     elif message.text is not None:
-        product.add_product_unit(message.text, 'text')
+        for product_unit in message.text.split('\n'):
+            product.add_product_unit(product_unit, 'text')
     await state.update_data({'product_life_cycle': product})
     await responses.product_management.SuccessUnitAddingResponse(message)
