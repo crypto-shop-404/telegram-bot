@@ -1,7 +1,7 @@
 import typing
 
 
-class User(typing.TypedDict):
+class Buyer(typing.TypedDict):
     telegram_id: int
     username: str | None
     purchase_number: int

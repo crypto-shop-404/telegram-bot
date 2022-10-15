@@ -19,7 +19,7 @@ async def general_statistics(message: aiogram.types.Message):
     with db_api.create_session() as session:
         buyers = []
         for telegram_id, username, quantity, amount in queries.get_buyers(session):
-            buyer: models.User = {
+            buyer: models.Buyer = {
                 'telegram_id': telegram_id, 'username': username,
                 'purchase_number': quantity, 'orders_amount': amount
             }

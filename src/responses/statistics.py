@@ -17,7 +17,7 @@ class StatisticsMenuResponse(base.BaseResponse):
 class StatisticsResponse(base.BaseResponse):
     def __init__(self, message: aiogram.types.Message, buyers_number: int, orders_amount: float,
                  sold_products_quantity: int, products_sold_units_quantity: list[tuple[str, int, ...]],
-                 active_buyers: list[models.User]):
+                 active_buyers: list[models.Buyer]):
         self.__message = message
         self.__buyers_number = buyers_number
         self.__orders_amount = orders_amount
