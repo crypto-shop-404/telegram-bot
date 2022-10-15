@@ -17,5 +17,5 @@ async def profile(message: aiogram.types.Message):
             message, user.id, user.username,
             queries.count_user_purchases(session, user.id),
             queries.get_user_orders_amount(session, user.id),
-            queries.get_purchases(session, user.id)
+            queries.get_purchases(session, user.id, limit=10)
         )

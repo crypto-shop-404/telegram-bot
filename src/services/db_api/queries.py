@@ -210,7 +210,8 @@ def get_not_sold_product_units(session: orm.Session, product_id: int,
     return session.scalars(statement).all()
 
 
-def get_purchases(session: orm.Session, user_id: int = None) -> list[tuple[str, int, float]]:
+def get_purchases(session: orm.Session, user_id: int = None, limit: int = None,
+                  offset: int = None) -> list[tuple[str, int, float]]:
     statement = sqlalchemy.select(
         schemas.Product.name,
         sqlalchemy.func.count(schemas.Sale.quantity),
@@ -218,7 +219,11 @@ def get_purchases(session: orm.Session, user_id: int = None) -> list[tuple[str, 
     ).join(schemas.Sale).group_by(schemas.Sale.product_id)
     if user_id is not None:
         statement = statement.having(schemas.Sale.user_id == user_id)
-    return session.execute(statement).all()
+    if limit is not None:
+        statement = statement.limit(limit)
+    if offset is not None:
+        statement = statement.offset(offset)
+    return session.execute(statement.order_by(schemas.Sale.created_at.desc())).all()
 
 
 def get_sales_by_user_id(session: orm.Session, user_id: int) -> list[schemas.Sale]:
@@ -455,7 +460,7 @@ def count_purchases(session: orm.Session) -> int:
 
 def count_user_purchases(session: orm.Session, user_id: int) -> int:
     statement = sqlalchemy.select(sqlalchemy.func.sum(schemas.Sale.quantity))
-    statement = statement.filter(schemas.Sale.id == user_id)
+    statement = statement.filter(schemas.Sale.user_id == user_id)
     return session.scalar(statement) or 0
 
 
@@ -470,7 +475,7 @@ def get_total_orders_amount(session: orm.Session) -> float:
 
 def get_user_orders_amount(session: orm.Session, user_id: int):
     statement = sqlalchemy.select(sqlalchemy.func.sum(schemas.Sale.amount))
-    return session.scalar(statement.filter(schemas.Sale.id == user_id)) or 0
+    return session.scalar(statement.filter(schemas.Sale.user_id == user_id)) or 0
 
 
 def get_total_balance(session: orm.Session) -> float:
