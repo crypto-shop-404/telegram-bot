@@ -1,4 +1,5 @@
 import asyncio
+import contextlib
 
 import coinbase_commerce
 from coinbase_commerce.api_resources import charge
@@ -8,7 +9,7 @@ from services.payments_apis import base_payments_api
 
 class CoinbaseAPI(base_payments_api.BasePaymentAPI):
     def __init__(self, api_key: str):
-        self.client = coinbase_commerce.client.Client(api_key=api_key)
+        self.__client = coinbase_commerce.client.Client(api_key=api_key)
 
     def create_charge(self, name: str, price: float, description: str = None) -> charge.Charge:
         charge_info = {
@@ -20,7 +21,7 @@ class CoinbaseAPI(base_payments_api.BasePaymentAPI):
             },
             "pricing_type": "fixed_price"
         }
-        return self.client.charge.create_product_unit(**charge_info)
+        return self.__client.charge.create_product_unit(**charge_info)
 
     @staticmethod
     async def check_payment(payment: charge.Charge) -> bool:
@@ -32,8 +33,9 @@ class CoinbaseAPI(base_payments_api.BasePaymentAPI):
         return True
 
     def check(self) -> bool:
-        try:
-            self.client.get()
-        except (error.AuthenticationError, error.ResourceNotFoundError):
-            return False
+        with contextlib.suppress(error.ResourceNotFoundError):
+            try:
+                self.__client.get()
+            except error.AuthenticationError:
+                return False
         return True
