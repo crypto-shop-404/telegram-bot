@@ -8,15 +8,16 @@ from aiogram import filters
 import config
 import responses.main_menu
 import responses.product_management
-from filters import is_user_in_db, is_admin
+from filters import is_admin
 from keyboards.inline import callback_factories
 from loader import dp
 from services import product_services
 from states import product_states
 
 
-@dp.callback_query_handler(callback_factories.ProductCallbackFactory().filter(action='add', product_id=''),
-                           is_admin.IsUserAdmin(), is_user_in_db.IsUserInDB())
+@dp.callback_query_handler(
+    callback_factories.ProductCallbackFactory().filter(action='add', product_id=''), is_admin.IsUserAdmin()
+)
 async def add_product(query: aiogram.types, callback_data: dict[str, str]):
     category_id, subcategory_id = callback_data['category_id'], callback_data['subcategory_id']
     category_id = int(category_id) if category_id != '' else None
@@ -28,8 +29,7 @@ async def add_product(query: aiogram.types, callback_data: dict[str, str]):
     await responses.product_management.AddProductNameResponse(query)
 
 
-@dp.message_handler(is_admin.IsUserAdmin(), is_user_in_db.IsUserInDB(),
-                    state=product_states.AddProduct.waiting_name)
+@dp.message_handler(is_admin.IsUserAdmin(), state=product_states.AddProduct.waiting_name)
 async def product_name(message: aiogram.types.Message, state: dispatcher.FSMContext):
     product_life_cycle = (await state.get_data())['product_life_cycle']
     product_life_cycle.add_product_name(message.text)
@@ -38,8 +38,7 @@ async def product_name(message: aiogram.types.Message, state: dispatcher.FSMCont
     await responses.product_management.AddProductDescriptionResponse(message)
 
 
-@dp.message_handler(is_admin.IsUserAdmin(), is_user_in_db.IsUserInDB(),
-                    state=product_states.AddProduct.waiting_description)
+@dp.message_handler(is_admin.IsUserAdmin(), state=product_states.AddProduct.waiting_description)
 async def product_description(message: aiogram.types.Message, state: dispatcher.FSMContext):
     product_life_cycle = (await state.get_data())['product_life_cycle']
     product_life_cycle.add_product_description(message.text)
@@ -48,8 +47,8 @@ async def product_description(message: aiogram.types.Message, state: dispatcher.
     await responses.product_management.AddProductImageResponse(message)
 
 
-@dp.message_handler(is_admin.IsUserAdmin(), is_user_in_db.IsUserInDB(),
-                    state=product_states.AddProduct.waiting_picture, content_types=['document', 'photo', 'text'])
+@dp.message_handler(is_admin.IsUserAdmin(), state=product_states.AddProduct.waiting_picture,
+                    content_types=['document', 'photo', 'text'])
 async def product_picture(message: aiogram.types.Message, state: dispatcher.FSMContext):
     filename = None
     if message.document is not None and message.document.mime_type == 'image':
@@ -66,8 +65,7 @@ async def product_picture(message: aiogram.types.Message, state: dispatcher.FSMC
     await responses.product_management.AddProductPriceResponse(message)
 
 
-@dp.message_handler(is_admin.IsUserAdmin(), is_user_in_db.IsUserInDB(),
-                    state=product_states.AddProduct.waiting_price)
+@dp.message_handler(is_admin.IsUserAdmin(), state=product_states.AddProduct.waiting_price)
 async def product_price(message: aiogram.types.Message, state: dispatcher.FSMContext):
     price = message.text
     if not price.replace('.', '').isdigit():
@@ -83,8 +81,7 @@ async def product_price(message: aiogram.types.Message, state: dispatcher.FSMCon
     await responses.product_management.AddProductUnitResponse(message)
 
 
-@dp.message_handler(filters.Text('✅ Complete'),
-                    is_admin.IsUserAdmin(), is_user_in_db.IsUserInDB(),
+@dp.message_handler(filters.Text('✅ Complete'), is_admin.IsUserAdmin(),
                     state=product_states.AddProduct.waiting_content)
 async def complete_product_adding(message: aiogram.types.Message, state: dispatcher.FSMContext):
     product = (await state.get_data())['product_life_cycle']
@@ -93,8 +90,7 @@ async def complete_product_adding(message: aiogram.types.Message, state: dispatc
     await responses.main_menu.AdminMainMenuResponse(message)
 
 
-@dp.message_handler(is_admin.IsUserAdmin(), is_user_in_db.IsUserInDB(), content_types=['text', 'photo', 'document'],
-                    state=product_states.AddProduct.waiting_content)
+@dp.message_handler(content_types=['text', 'photo', 'document'], state=product_states.AddProduct.waiting_content)
 async def add_product_unit(message: aiogram.types.Message, state: dispatcher.FSMContext):
     product = (await state.get_data())['product_life_cycle']
     pending_dir = config.PENDING_DIR_PATH / str(message.from_user.id)

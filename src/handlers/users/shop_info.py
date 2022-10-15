@@ -2,13 +2,13 @@ import aiogram
 from aiogram import filters
 
 import responses.shop_information
-from filters import is_user_in_db, is_admin
+from filters import is_admin
 from loader import dp
 from services import db_api
 from services.db_api import queries
 
 
-@dp.message_handler(filters.Text('ℹ️ FAQ'), is_user_in_db.IsUserInDB(), ~is_admin.IsUserAdmin())
+@dp.message_handler(filters.Text('ℹ️ FAQ'), ~is_admin.IsUserAdmin())
 async def faq_handler(message: aiogram.types.Message):
     with db_api.create_session() as session:
         faq = queries.get_faq(session)
@@ -17,7 +17,7 @@ async def faq_handler(message: aiogram.types.Message):
         )
 
 
-@dp.message_handler(filters.Text('📗 Rules'), is_user_in_db.IsUserInDB(), ~is_admin.IsUserAdmin())
+@dp.message_handler(filters.Text('📗 Rules'), ~is_admin.IsUserAdmin())
 async def rules_handler(message: aiogram.types.Message):
     with db_api.create_session() as session:
         rules = queries.get_rules(session)

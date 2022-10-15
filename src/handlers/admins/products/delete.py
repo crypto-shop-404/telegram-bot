@@ -1,15 +1,15 @@
 import aiogram.types
 
 import responses.product_management
-from filters import is_admin, is_user_in_db
+from filters import is_admin
 from keyboards.inline import callback_factories
 from loader import dp
 from services import db_api, product_services
 from services.db_api import queries
 
 
-@dp.callback_query_handler(callback_factories.ProductCallbackFactory().filter(action='delete'),
-                           is_admin.IsUserAdmin(), is_user_in_db.IsUserInDB())
+@dp.callback_query_handler(
+    callback_factories.ProductCallbackFactory().filter(action='delete'), is_admin.IsUserAdmin())
 async def delete_product(query: aiogram.types.CallbackQuery, callback_data: dict[str, str]):
     category_id = int(callback_data['category_id'])
     subcategory_id = callback_data['subcategory_id']
@@ -28,8 +28,8 @@ async def delete_product(query: aiogram.types.CallbackQuery, callback_data: dict
             await responses.product_management.CategoryItemsResponse(query, items, category_id)
 
 
-@dp.callback_query_handler(callback_factories.ProductCallbackFactory().filter(action='delete_units'),
-                           is_admin.IsUserAdmin(), is_user_in_db.IsUserInDB())
+@dp.callback_query_handler(
+    callback_factories.ProductCallbackFactory().filter(action='delete_units'), is_admin.IsUserAdmin())
 async def delete_product_units(query: aiogram.types.CallbackQuery, callback_data: dict[str, str]):
     category_id, subcategory_id = callback_data['category_id'], callback_data['subcategory_id']
     category_id = int(category_id) if category_id != '' else None

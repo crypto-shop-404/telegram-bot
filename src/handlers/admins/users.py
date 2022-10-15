@@ -4,18 +4,16 @@ import aiogram
 from aiogram import filters, dispatcher
 
 import responses.users
-from loader import dp, bot
+from filters import is_admin
 from keyboards.inline import callback_factories
 from keyboards.inline import common_keybords
+from loader import dp, bot
 from services import db_api
 from services.db_api import queries
 from states import users_states
-from filters import is_user_in_db, is_admin
 
 
-@dp.message_handler(
-    filters.Text('🙍‍♂ Users'), is_user_in_db.IsUserInDB(), is_admin.IsUserAdmin()
-)
+@dp.message_handler(filters.Text('🙍‍♂ Users'), is_admin.IsUserAdmin())
 async def users(message: aiogram.types.Message):
     with db_api.create_session() as session:
         total_balance, page_size = queries.get_total_balance(session), 10
@@ -26,8 +24,7 @@ async def users(message: aiogram.types.Message):
 
 
 @dp.callback_query_handler(
-    callback_factories.UserCallbackFactory().filter(filter='', id='', action=''),
-    is_user_in_db.IsUserInDB(), is_admin.IsUserAdmin()
+    callback_factories.UserCallbackFactory().filter(filter='', id='', action=''), is_admin.IsUserAdmin()
 )
 async def users(query: aiogram.types.CallbackQuery, callback_data: dict):
     with db_api.create_session() as session:
@@ -40,16 +37,14 @@ async def users(query: aiogram.types.CallbackQuery, callback_data: dict):
 
 
 @dp.callback_query_handler(
-    callback_factories.UserCallbackFactory().filter(id='', action='search'),
-    is_user_in_db.IsUserInDB(), is_admin.IsUserAdmin()
+    callback_factories.UserCallbackFactory().filter(id='', action='search'), is_admin.IsUserAdmin()
 )
 async def search_users(query: aiogram.types.CallbackQuery):
     await responses.users.SearchUserResponse(query)
     await users_states.SearchUsersStates.waiting_identifiers.set()
 
 
-@dp.message_handler(is_user_in_db.IsUserInDB(), is_admin.IsUserAdmin(),
-                    state=users_states.SearchUsersStates.waiting_identifiers)
+@dp.message_handler(is_admin.IsUserAdmin(), state=users_states.SearchUsersStates.waiting_identifiers)
 async def search_users(message: aiogram.types.Message, state: dispatcher.FSMContext):
     await state.finish()
     usernames, ids = [], []
@@ -71,8 +66,7 @@ async def search_users(message: aiogram.types.Message, state: dispatcher.FSMCont
 
 
 @dp.callback_query_handler(
-    callback_factories.UserCallbackFactory().filter(id='', action=''),
-    is_user_in_db.IsUserInDB(), is_admin.IsUserAdmin()
+    callback_factories.UserCallbackFactory().filter(id='', action=''), is_admin.IsUserAdmin()
 )
 async def users(query: aiogram.types.CallbackQuery, callback_data: dict):
     usernames, ids = [], []
@@ -97,8 +91,7 @@ async def users(query: aiogram.types.CallbackQuery, callback_data: dict):
 
 
 @dp.callback_query_handler(
-    callback_factories.UserCallbackFactory().filter(action='manage'),
-    is_user_in_db.IsUserInDB(), is_admin.IsUserAdmin()
+    callback_factories.UserCallbackFactory().filter(action='manage'), is_admin.IsUserAdmin()
 )
 async def user_menu(query: aiogram.types.CallbackQuery, callback_data: dict[str: str]):
     with db_api.create_session() as session:
@@ -108,8 +101,7 @@ async def user_menu(query: aiogram.types.CallbackQuery, callback_data: dict[str:
 
 
 @dp.callback_query_handler(
-    callback_factories.UserCallbackFactory().filter(action='ban', is_confirmed=''),
-    is_user_in_db.IsUserInDB(), is_admin.IsUserAdmin()
+    callback_factories.UserCallbackFactory().filter(action='ban', is_confirmed=''), is_admin.IsUserAdmin()
 )
 async def ban_user(query: aiogram.types.CallbackQuery, callback_data: dict[str: str]):
     with db_api.create_session() as session:
@@ -118,8 +110,7 @@ async def ban_user(query: aiogram.types.CallbackQuery, callback_data: dict[str: 
 
 
 @dp.callback_query_handler(
-    callback_factories.UserCallbackFactory().filter(action='ban'),
-    is_user_in_db.IsUserInDB(), is_admin.IsUserAdmin()
+    callback_factories.UserCallbackFactory().filter(action='ban'), is_admin.IsUserAdmin()
 )
 async def ban_user(query: aiogram.types.CallbackQuery, callback_data: dict[str, str]):
     with db_api.create_session() as session:
@@ -133,8 +124,7 @@ async def ban_user(query: aiogram.types.CallbackQuery, callback_data: dict[str, 
 
 
 @dp.callback_query_handler(
-    callback_factories.UserCallbackFactory().filter(action='unban', is_confirmed=''),
-    is_user_in_db.IsUserInDB(), is_admin.IsUserAdmin()
+    callback_factories.UserCallbackFactory().filter(action='unban', is_confirmed=''), is_admin.IsUserAdmin()
 )
 async def unban_user(query: aiogram.types.CallbackQuery, callback_data: dict[str: str]):
     with db_api.create_session() as session:
@@ -143,8 +133,7 @@ async def unban_user(query: aiogram.types.CallbackQuery, callback_data: dict[str
 
 
 @dp.callback_query_handler(
-    callback_factories.UserCallbackFactory().filter(action='unban'),
-    is_user_in_db.IsUserInDB(), is_admin.IsUserAdmin()
+    callback_factories.UserCallbackFactory().filter(action='unban'), is_admin.IsUserAdmin()
 )
 async def unban_user(query: aiogram.types.CallbackQuery, callback_data: dict[str, str]):
     with db_api.create_session() as session:
@@ -158,8 +147,7 @@ async def unban_user(query: aiogram.types.CallbackQuery, callback_data: dict[str
 
 
 @dp.callback_query_handler(
-    callback_factories.UserCallbackFactory().filter(action='delete', is_confirmed=''),
-    is_user_in_db.IsUserInDB(), is_admin.IsUserAdmin()
+    callback_factories.UserCallbackFactory().filter(action='delete', is_confirmed=''), is_admin.IsUserAdmin()
 )
 async def delete_user(query: aiogram.types.CallbackQuery, callback_data: dict[str: str]):
     with db_api.create_session() as session:
@@ -168,8 +156,7 @@ async def delete_user(query: aiogram.types.CallbackQuery, callback_data: dict[st
 
 
 @dp.callback_query_handler(
-    callback_factories.UserCallbackFactory().filter(action='delete'),
-    is_user_in_db.IsUserInDB(), is_admin.IsUserAdmin()
+    callback_factories.UserCallbackFactory().filter(action='delete'), is_admin.IsUserAdmin()
 )
 async def delete_user(query: aiogram.types.CallbackQuery, callback_data: dict[str, str]):
     with db_api.create_session() as session:
@@ -190,8 +177,7 @@ async def delete_user(query: aiogram.types.CallbackQuery, callback_data: dict[st
 
 
 @dp.callback_query_handler(
-    callback_factories.EditUserBalanceCallbackFactory().filter(is_confirmed=''),
-    is_user_in_db.IsUserInDB(), is_admin.IsUserAdmin()
+    callback_factories.EditUserBalanceCallbackFactory().filter(is_confirmed=''), is_admin.IsUserAdmin()
 )
 async def edit_balance(query: aiogram.types.CallbackQuery, callback_data: dict[str, str]):
     await responses.users.NewBalanceResponse(query)
@@ -199,8 +185,7 @@ async def edit_balance(query: aiogram.types.CallbackQuery, callback_data: dict[s
     await dp.current_state().update_data({'callback_data': callback_data})
 
 
-@dp.message_handler(is_user_in_db.IsUserInDB(), is_admin.IsUserAdmin(),
-                    state=users_states.EditBalanceStates.waiting_balance)
+@dp.message_handler(is_admin.IsUserAdmin(), state=users_states.EditBalanceStates.waiting_balance)
 async def enter_new_balance(message: aiogram.types.Message, state: dispatcher.FSMContext):
     if message.text.replace('.', '').isdigit():
         callback_data = (await state.get_data())['callback_data']
@@ -215,8 +200,7 @@ async def enter_new_balance(message: aiogram.types.Message, state: dispatcher.FS
 
 
 @dp.callback_query_handler(
-    callback_factories.EditUserBalanceCallbackFactory().filter(reason=''),
-    is_user_in_db.IsUserInDB(), is_admin.IsUserAdmin()
+    callback_factories.EditUserBalanceCallbackFactory().filter(reason=''), is_admin.IsUserAdmin()
 )
 async def balance_editing_reason(query: aiogram.types.CallbackQuery, callback_data: dict[str, str]):
     if callback_data['is_confirmed'] == 'yes':
@@ -230,10 +214,7 @@ async def balance_editing_reason(query: aiogram.types.CallbackQuery, callback_da
             )
 
 
-@dp.callback_query_handler(
-    callback_factories.EditUserBalanceCallbackFactory().filter(),
-    is_user_in_db.IsUserInDB(), is_admin.IsUserAdmin()
-)
+@dp.callback_query_handler(callback_factories.EditUserBalanceCallbackFactory().filter(), is_admin.IsUserAdmin())
 async def edit_balance(query: aiogram.types.CallbackQuery, callback_data: dict[str, str]):
     with db_api.create_session() as session:
         new_balance = float(callback_data['balance'])
@@ -256,8 +237,7 @@ async def edit_balance(query: aiogram.types.CallbackQuery, callback_data: dict[s
 
 
 @dp.callback_query_handler(
-    callback_factories.TopUpUserBalanceCallbackFactory().filter(is_confirmed=''),
-    is_user_in_db.IsUserInDB(), is_admin.IsUserAdmin()
+    callback_factories.TopUpUserBalanceCallbackFactory().filter(is_confirmed=''), is_admin.IsUserAdmin()
 )
 async def top_up_balance(query: aiogram.types.CallbackQuery, callback_data: dict[str, str]):
     await responses.users.NewBalanceResponse(query)
@@ -265,7 +245,7 @@ async def top_up_balance(query: aiogram.types.CallbackQuery, callback_data: dict
     await dp.current_state().update_data({'callback_data': callback_data})
 
 
-@dp.message_handler(state=users_states.TopUpBalanceStates.waiting_balance)
+@dp.message_handler(is_admin.IsUserAdmin(), state=users_states.TopUpBalanceStates.waiting_balance)
 async def enter_balance(message: aiogram.types.Message, state: dispatcher.FSMContext):
     if message.text.replace('.', '').isdigit():
         callback_data = (await state.get_data())['callback_data']
@@ -280,8 +260,7 @@ async def enter_balance(message: aiogram.types.Message, state: dispatcher.FSMCon
 
 
 @dp.callback_query_handler(
-    callback_factories.TopUpUserBalanceCallbackFactory().filter(payment_method=''),
-    is_user_in_db.IsUserInDB(), is_admin.IsUserAdmin()
+    callback_factories.TopUpUserBalanceCallbackFactory().filter(payment_method=''), is_admin.IsUserAdmin()
 )
 async def balance_refill_method(query: aiogram.types.CallbackQuery, callback_data: dict[str, str]):
     if callback_data['is_confirmed'] == 'yes':
@@ -295,10 +274,7 @@ async def balance_refill_method(query: aiogram.types.CallbackQuery, callback_dat
             )
 
 
-@dp.callback_query_handler(
-    callback_factories.TopUpUserBalanceCallbackFactory().filter(),
-    is_user_in_db.IsUserInDB(), is_admin.IsUserAdmin()
-)
+@dp.callback_query_handler(callback_factories.TopUpUserBalanceCallbackFactory().filter(), is_admin.IsUserAdmin())
 async def top_up_balance(query: aiogram.types.CallbackQuery, callback_data: dict[str, str]):
     with db_api.create_session() as session:
         balance_delta = decimal.Decimal(callback_data['balance_delta'])

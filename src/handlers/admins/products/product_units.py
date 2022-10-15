@@ -6,7 +6,7 @@ from aiogram import dispatcher, filters
 
 import config
 import responses.product_management
-from filters import is_admin, is_user_in_db
+from filters import is_admin
 from keyboards.inline import callback_factories
 from loader import dp
 from services import db_api
@@ -15,15 +15,15 @@ from services.db_api import queries
 from states import product_states
 
 
-@dp.callback_query_handler(callback_factories.ProductCallbackFactory().filter(action='add_units'),
-                           is_admin.IsUserAdmin(), is_user_in_db.IsUserInDB())
+@dp.callback_query_handler(
+    callback_factories.ProductCallbackFactory().filter(action='add_units'), is_admin.IsUserAdmin())
 async def add_product_unit(query: aiogram.types.CallbackQuery, callback_data: dict[str, str]):
     await responses.product_management.AddProductUnitResponse(query)
     await product_states.AddProductUnit.waiting_content.set()
     await dp.current_state().update_data(callback_data | {'units': []})
 
 
-@dp.message_handler(filters.Text('✅ Complete'), is_admin.IsUserAdmin(), is_user_in_db.IsUserInDB(),
+@dp.message_handler(filters.Text('✅ Complete'), is_admin.IsUserAdmin(),
                     state=product_states.AddProductUnit.waiting_content)
 async def complete_units_loading(message: aiogram.types.Message, state: dispatcher.FSMContext):
     data = await state.get_data()
@@ -41,8 +41,7 @@ async def complete_units_loading(message: aiogram.types.Message, state: dispatch
         )
 
 
-@dp.message_handler(is_admin.IsUserAdmin(), is_user_in_db.IsUserInDB(),
-                    state=product_states.AddProductUnit.waiting_content,
+@dp.message_handler(is_admin.IsUserAdmin(), state=product_states.AddProductUnit.waiting_content,
                     content_types=['text', 'photo', 'document'])
 async def add_product_unit(message: aiogram.types.Message, state: dispatcher.FSMContext):
     data = await state.get_data()
@@ -74,8 +73,8 @@ async def add_product_unit(message: aiogram.types.Message, state: dispatcher.FSM
     await responses.product_management.SuccessUnitAddingResponse(message)
 
 
-@dp.callback_query_handler(callback_factories.ProductCallbackFactory().filter(action='units'),
-                           is_admin.IsUserAdmin(), is_user_in_db.IsUserInDB())
+@dp.callback_query_handler(
+    callback_factories.ProductCallbackFactory().filter(action='units'), is_admin.IsUserAdmin())
 async def product_units(query: aiogram.types.CallbackQuery, callback_data: dict[str, str]):
     product_id = int(callback_data['product_id'])
     subcategory_id = callback_data['subcategory_id']
@@ -88,8 +87,8 @@ async def product_units(query: aiogram.types.CallbackQuery, callback_data: dict[
         )
 
 
-@dp.callback_query_handler(callback_factories.ProductUnitCallbackFactory().filter(action='manage'),
-                           is_admin.IsUserAdmin(), is_user_in_db.IsUserInDB())
+@dp.callback_query_handler(
+    callback_factories.ProductUnitCallbackFactory().filter(action='manage'), is_admin.IsUserAdmin())
 async def product_unit_menu(query: aiogram.types.CallbackQuery, callback_data: dict[str, str]):
     unit_id = int(callback_data['id'])
     subcategory_id = callback_data['subcategory_id']
@@ -102,16 +101,16 @@ async def product_unit_menu(query: aiogram.types.CallbackQuery, callback_data: d
         )
 
 
-@dp.callback_query_handler(callback_factories.ProductUnitCallbackFactory().filter(action='edit'),
-                           is_admin.IsUserAdmin(), is_user_in_db.IsUserInDB())
+@dp.callback_query_handler(
+    callback_factories.ProductUnitCallbackFactory().filter(action='edit'), is_admin.IsUserAdmin())
 async def edit_product_unit(query: aiogram.types.CallbackQuery, callback_data: dict[str, str]):
     await responses.product_management.EditProductUnitsResponse(query)
     await product_states.EditProductUnit.waiting_content.set()
     await dp.current_state().update_data(callback_data)
 
 
-@dp.message_handler(is_admin.IsUserAdmin(), is_user_in_db.IsUserInDB(),
-                    state=product_states.EditProductUnit.waiting_content, content_types=['photo', 'document'])
+@dp.message_handler(is_admin.IsUserAdmin(), state=product_states.EditProductUnit.waiting_content,
+                    content_types=['photo', 'document'])
 async def edit_product_unit(message: aiogram.types.Message, state: dispatcher.FSMContext):
     data = await state.get_data()
     subcategory_id = data['subcategory_id']
@@ -134,8 +133,7 @@ async def edit_product_unit(message: aiogram.types.Message, state: dispatcher.FS
         )
 
 
-@dp.message_handler(is_admin.IsUserAdmin(), is_user_in_db.IsUserInDB(),
-                    state=product_states.EditProductUnit.waiting_content)
+@dp.message_handler(is_admin.IsUserAdmin(), state=product_states.EditProductUnit.waiting_content)
 async def edit_product_unit(message: aiogram.types.Message, state: dispatcher.FSMContext):
     data = await state.get_data()
     await state.finish()
@@ -153,8 +151,8 @@ async def edit_product_unit(message: aiogram.types.Message, state: dispatcher.FS
         )
 
 
-@dp.callback_query_handler(callback_factories.ProductUnitCallbackFactory().filter(action='delete'),
-                           is_admin.IsUserAdmin(), is_user_in_db.IsUserInDB())
+@dp.callback_query_handler(
+    callback_factories.ProductUnitCallbackFactory().filter(action='delete'), is_admin.IsUserAdmin())
 async def delete_product_unit(query: aiogram.types.CallbackQuery, callback_data: dict[str, str]):
     product_id = int(callback_data['product_id'])
     subcategory_id = callback_data['subcategory_id']

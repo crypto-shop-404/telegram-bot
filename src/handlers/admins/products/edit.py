@@ -7,7 +7,7 @@ from aiogram import dispatcher
 import config
 import responses.main_menu
 import responses.product_management
-from filters import is_user_in_db, is_admin
+from filters import is_admin
 from keyboards.inline import callback_factories
 from loader import dp
 from services import db_api
@@ -15,16 +15,15 @@ from services.db_api import queries
 from states import product_states
 
 
-@dp.callback_query_handler(callback_factories.ProductCallbackFactory().filter(action='edit_title'),
-                           is_admin.IsUserAdmin(), is_user_in_db.IsUserInDB())
+@dp.callback_query_handler(
+    callback_factories.ProductCallbackFactory().filter(action='edit_title'), is_admin.IsUserAdmin())
 async def edit_product_title(query: aiogram.types.CallbackQuery, callback_data: dict[str, str]):
     await responses.product_management.EditProductResponse(query)
     await product_states.EditProductTitle.waiting_title.set()
     await dp.current_state().update_data(callback_data)
 
 
-@dp.message_handler(is_admin.IsUserAdmin(), is_user_in_db.IsUserInDB(),
-                    state=product_states.EditProductTitle.waiting_title)
+@dp.message_handler(is_admin.IsUserAdmin(), state=product_states.EditProductTitle.waiting_title)
 async def edit_product_title(message: aiogram.types.Message, state: dispatcher.FSMContext):
     state_data = await state.get_data()
     await state.finish()
@@ -40,16 +39,15 @@ async def edit_product_title(message: aiogram.types.Message, state: dispatcher.F
         )
 
 
-@dp.callback_query_handler(callback_factories.ProductCallbackFactory().filter(action='edit_description'),
-                           is_admin.IsUserAdmin(), is_user_in_db.IsUserInDB())
+@dp.callback_query_handler(
+    callback_factories.ProductCallbackFactory().filter(action='edit_description'), is_admin.IsUserAdmin())
 async def edit_product_description(query: aiogram.types.CallbackQuery, callback_data: dict[str, str]):
     await responses.product_management.EditProductResponse(query)
     await product_states.EditProductDescription.waiting_description.set()
     await dp.current_state().update_data(callback_data)
 
 
-@dp.message_handler(is_admin.IsUserAdmin(), is_user_in_db.IsUserInDB(),
-                    state=product_states.EditProductDescription.waiting_description)
+@dp.message_handler(is_admin.IsUserAdmin(), state=product_states.EditProductDescription.waiting_description)
 async def edit_product_description(message: aiogram.types.Message, state: dispatcher.FSMContext):
     state_data = await state.get_data()
     await state.finish()
@@ -65,8 +63,8 @@ async def edit_product_description(message: aiogram.types.Message, state: dispat
         )
 
 
-@dp.callback_query_handler(callback_factories.ProductCallbackFactory().filter(action='edit_picture'),
-                           is_admin.IsUserAdmin(), is_user_in_db.IsUserInDB())
+@dp.callback_query_handler(
+    callback_factories.ProductCallbackFactory().filter(action='edit_picture'), is_admin.IsUserAdmin())
 async def edit_product_picture(query: aiogram.types.CallbackQuery, callback_data: dict[str, str]):
     with db_api.create_session() as session:
         product = queries.get_product(session, int(callback_data['product_id']))
@@ -78,10 +76,8 @@ async def edit_product_picture(query: aiogram.types.CallbackQuery, callback_data
     await dp.current_state().update_data(callback_data)
 
 
-@dp.message_handler(is_admin.IsUserAdmin(), is_user_in_db.IsUserInDB(),
-                    state=product_states.EditProductPicture.waiting_picture,
-                    content_types=['photo', 'document', 'text']
-                    )
+@dp.message_handler(is_admin.IsUserAdmin(), state=product_states.EditProductPicture.waiting_picture,
+                    content_types=['photo', 'document', 'text'])
 async def edit_product_picture(message: aiogram.types.Message, state: dispatcher.FSMContext):
     state_data = await state.get_data()
     await state.finish()
@@ -111,15 +107,15 @@ async def edit_product_picture(message: aiogram.types.Message, state: dispatcher
         )
 
 
-@dp.callback_query_handler(callback_factories.ProductCallbackFactory().filter(action='edit_price'),
-                           is_admin.IsUserAdmin(), is_user_in_db.IsUserInDB())
+@dp.callback_query_handler(
+    callback_factories.ProductCallbackFactory().filter(action='edit_price'), is_admin.IsUserAdmin())
 async def edit_product_title(query: aiogram.types.CallbackQuery, callback_data: dict[str, str]):
     await responses.product_management.EditProductResponse(query)
     await product_states.EditProductPrice.waiting_price.set()
     await dp.current_state().update_data(callback_data)
 
 
-@dp.message_handler(is_admin.IsUserAdmin(), is_user_in_db.IsUserInDB(), state=product_states.EditProductPrice)
+@dp.message_handler(is_admin.IsUserAdmin(), state=product_states.EditProductPrice)
 async def edit_product_price(message: aiogram.types.Message, state: dispatcher.FSMContext):
     if not message.text.replace('.', '').isdigit():
         await responses.product_management.IncorrectPriceResponse(message)
