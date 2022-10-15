@@ -9,8 +9,6 @@ from .backup import dp
 from .support import dp
 from .statistics import dp
 from .shop_info import dp
-# from .balance import dp
-# from .payments import dp
 
 
 __all__ = ('dp', )
