@@ -45,17 +45,17 @@ class NewPurchaseNotification(BaseNotification):
 
     async def send(self):
         text = self.__get_text()
-        media_groups = [aiogram.types.MediaGroup()]
+        media_groups = []
         admins_id = AppSettings().admins_id
         for admin_id in admins_id:
             bot.send_message(admin_id, text)
         for i, unit in enumerate(self.__product_units):
             if unit.type != 'document':
                 continue
+            if i % 10 == 0:
+                media_groups.append(aiogram.types.MediaGroup())
             path = config.PRODUCT_UNITS_PATH / unit.content
             media_groups[-1].attach_document(aiogram.types.InputFile(path))
-            if (i + 1) % 10 == 0:
-                media_groups.append(aiogram.types.MediaGroup())
         for admin_id in admins_id:
             try:
                 for media_group in media_groups:
