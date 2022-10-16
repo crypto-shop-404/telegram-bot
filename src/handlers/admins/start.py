@@ -14,7 +14,9 @@ from services.db_api import queries
 async def accept_rules(message: aiogram.types.Message):
     with db_api.create_session() as session:
         queries.add_user(
-            session, message.from_user.id, message.from_user.username.lower()
+            session, message.from_user.id,
+            message.from_user.username.lower()
+            if message.from_user.username is not None else None
         )
         await responses.start.NewUserResponse(message)
         await responses.main_menu.AdminMainMenuResponse(message)

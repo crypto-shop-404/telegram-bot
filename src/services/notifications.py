@@ -16,7 +16,7 @@ class BaseNotification(abc.ABC):
 
 
 class NewUserNotification(BaseNotification):
-    def __init__(self, user_id: int, username: str):
+    def __init__(self, user_id: int, username: str | None):
         self.__user_id = user_id
         self.__username = username
 

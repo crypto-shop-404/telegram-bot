@@ -181,8 +181,8 @@ async def pay_with_coinbase(query: aiogram.types.CallbackQuery, callback_data: d
             query, amount, quantity, charge['hosted_url'])
         if api.check_payment(charge):
             sale_id = queries.add_sale(
-                session, user.id, user.username,
-                product.id, amount, quantity, payment_type='coinbase').id
+                session, user.id, user.username, product.id,
+                amount, quantity, payment_type='coinbase').id
             product_units = queries.get_not_sold_product_units(session, product.id, quantity)
             queries.edit_product_quantity(session, product.id, -quantity)
             for product_unit in product_units:
