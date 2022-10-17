@@ -179,7 +179,7 @@ async def pay_with_coinbase(query: aiogram.types.CallbackQuery, callback_data: d
         charge = api.create_charge(product.name, product.price, product.description)
         payment_message = await responses.payments.CoinbasePaymentLinkResponse(
             query, amount, quantity, charge['hosted_url'])
-        if api.check_payment(charge):
+        if await api.check_payment(charge):
             sale_id = queries.add_sale(
                 session, user.id, user.username, product.id,
                 amount, quantity, payment_type='coinbase').id
