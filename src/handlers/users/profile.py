@@ -17,7 +17,7 @@ async def profile(message: aiogram.types.Message):
             raise exceptions.UserNotInDatabase
         queries.get_purchases(session, message.from_user.id)
         await responses.profile.ProfileResponse(
-            message, user.id, user.username,
+            message, user.telegram_id, user.username,
             queries.count_user_purchases(session, user.id),
             queries.get_user_orders_amount(session, user.id),
             queries.get_purchases(session, user.id, limit=10)
