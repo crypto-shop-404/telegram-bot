@@ -6,6 +6,7 @@ from aiogram import filters
 import config
 import exceptions
 import responses.balance
+import responses.payments
 from keyboards.inline import callback_factories
 from loader import dp
 from services import db_api
@@ -62,8 +63,11 @@ async def top_up_balance_with_coinbase(query: aiogram.types.CallbackQuery, callb
         amount = float(callback_data['amount'])
         api = coinbase_api.CoinbaseAPI(config.CoinbaseSettings().api_key)
         charge = api.create_charge('Balance', amount)
-        if api.check_payment(charge):
+        payments_message = await responses.payments.CoinbasePaymentBalanceResponse(
+            query, amount, charge['hosted_url']
+        )
+        if await api.check_payment(charge):
             await responses.balance.SuccessBalanceRefillResponse(query, amount)
         else:
-            await responses.balance.SuccessBalanceRefillResponse(query, amount)
+            await responses.payments.FailedPurchaseResponse(payments_message)
         queries.top_up_balance(session, query.from_user.id, amount)
