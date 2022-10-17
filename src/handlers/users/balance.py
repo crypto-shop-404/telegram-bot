@@ -66,4 +66,4 @@ async def top_up_balance_with_coinbase(query: aiogram.types.CallbackQuery, callb
             await responses.balance.SuccessBalanceRefillResponse(query, amount)
         else:
             await responses.balance.SuccessBalanceRefillResponse(query, amount)
-        queries.top_up_balance(session, query.from_user.id, decimal.Decimal(str(amount)))
+        queries.top_up_balance(session, query.from_user.id, amount)

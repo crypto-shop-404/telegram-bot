@@ -296,10 +296,12 @@ def unban_user(session: orm.Session, user_id: int) -> schemas.User | None:
         return user
 
 
-def top_up_balance(session: orm.Session, user_id: int, balance_delta: float) -> None:
+def top_up_balance(session: orm.Session, user_id: int, balance_delta: float | decimal.Decimal) -> None:
     user = get_user(session, user_id)
+    if isinstance(balance_delta, float):
+        balance_delta = decimal.Decimal(str(balance_delta))
     if user is not None:
-        balance = decimal.Decimal(str(user.balance)) + decimal.Decimal(str(balance_delta))
+        balance = decimal.Decimal(str(user.balance)) + balance_delta
         user.balance = float(balance)
 
 
