@@ -55,14 +55,19 @@ class PurchaseInformationResponse(base.BaseResponse):
         text = self.get_text()
         await self.__query.answer()
         await self.__query.message.edit_text(text)
-        media_group = aiogram.types.MediaGroup()
-        for i, unit in enumerate(self.__product_units):
-            if unit.type == 'document':
-                path = config.PRODUCT_UNITS_PATH / unit.content
-                media_group.attach_document(aiogram.types.InputFile(path))
-                if (i + 1) % 10 == 0:
+        media_group = None
+        is_media_group_sent = False
+        for i, unit in enumerate(unit for unit in self.__product_units if unit.type == 'document'):
+            if i % 10 == 0:
+                is_media_group_sent = False
+                if media_group is not None:
                     await self.__query.message.answer_media_group(media_group)
-                    media_group = aiogram.types.MediaGroup()
+                    is_media_group_sent = True
+                media_group = aiogram.types.MediaGroup()
+            path = config.PRODUCT_UNITS_PATH / unit.content
+            media_group.attach_document(aiogram.types.InputFile(path))
+        if not is_media_group_sent and media_group is not None:
+            await self.__query.message.answer_media_group(media_group)
 
     def get_text(self):
         text = (

@@ -49,9 +49,7 @@ class NewPurchaseNotification(BaseNotification):
         admins_id = AppSettings().admins_id
         for admin_id in admins_id:
             await bot.send_message(admin_id, text)
-        for i, unit in enumerate(self.__product_units):
-            if unit.type != 'document':
-                continue
+        for i, unit in enumerate(unit for unit in self.__product_units if unit.type == 'document'):
             if i % 10 == 0:
                 media_groups.append(aiogram.types.MediaGroup())
             path = config.PRODUCT_UNITS_PATH / unit.content
