@@ -180,13 +180,19 @@ async def pay_with_coinbase(query: aiogram.types.CallbackQuery, callback_data: d
         payment_message = await responses.payments.CoinbasePaymentLinkResponse(
             query, amount, quantity, charge['hosted_url'])
         if await api.check_payment(charge):
-            sale_id = queries.add_sale(
+            sale = queries.add_sale(
                 session, user.id, user.username, product.id,
-                amount, quantity, payment_type='coinbase').id
+                amount, quantity, payment_type='coinbase')
             product_units = queries.get_not_sold_product_units(session, product.id, quantity)
             queries.edit_product_quantity(session, product.id, -quantity)
             for product_unit in product_units:
-                queries.add_sold_product_unit(session, sale_id, product_unit.id)
+                queries.add_sold_product_unit(session, sale.id, product_unit.id)
+                session.expunge_all()
+                session.commit()
+            await responses.payments.PurchaseInformationResponse(
+                query, sale.id, product.name, quantity, amount, product_units
+            )
+            await notifications.NewPurchaseNotification(sale, '💲 Balance', product.name, product_units).send()
         else:
             await responses.payments.FailedPurchaseResponse(payment_message)
 
@@ -214,11 +220,11 @@ async def pay_with_balance(query: aiogram.types.CallbackQuery, callback_data: di
                 queries.top_up_balance(session, user.id, -amount)
                 for product_unit in product_units:
                     queries.add_sold_product_unit(session, sale.id, product_unit.id)
+            session.expunge_all()
+            session.commit()
             await responses.payments.PurchaseInformationResponse(
                 query, sale.id, product.name, quantity, amount, product_units
             )
-            session.expunge_all()
-            session.commit()
             await notifications.NewPurchaseNotification(sale, '💲 Balance', product.name, product_units).send()
         else:
             await responses.payments.NotEnoughBalanceResponse(query)

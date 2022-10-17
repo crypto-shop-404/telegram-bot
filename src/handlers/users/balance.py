@@ -1,5 +1,3 @@
-import decimal
-
 import aiogram
 from aiogram import filters
 
@@ -58,6 +56,7 @@ async def balance_amount(message: aiogram.types.Message, state: aiogram.dispatch
 )
 async def top_up_balance_with_coinbase(query: aiogram.types.CallbackQuery, callback_data: dict[str: str]):
     with db_api.create_session() as session:
+        user = queries.get_user(session, telegram_id=query.from_user.id)
         if not queries.check_is_user_exists(session, query.from_user.id):
             raise exceptions.UserNotInDatabase
         amount = float(callback_data['amount'])
@@ -67,7 +66,8 @@ async def top_up_balance_with_coinbase(query: aiogram.types.CallbackQuery, callb
             query, amount, charge['hosted_url']
         )
         if await api.check_payment(charge):
+            queries.top_up_balance(session, user.id, amount)
             await responses.balance.SuccessBalanceRefillResponse(query, amount)
         else:
+            queries.top_up_balance(session, user.id, amount)
             await responses.payments.FailedPurchaseResponse(payments_message)
-        queries.top_up_balance(session, query.from_user.id, amount)

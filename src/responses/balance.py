@@ -1,3 +1,5 @@
+import contextlib
+
 import aiogram.types
 
 from keyboards.buttons import common_buttons
@@ -57,7 +59,8 @@ class SuccessBalanceRefillResponse(base.BaseResponse):
         self.__amount = amount
 
     async def _send_response(self):
-        await self.__query.answer()
+        with contextlib.suppress(aiogram.exceptions.InvalidQueryID):
+            await self.__query.answer()
         await self.__query.message.edit_text(f'✅ Balance was topped up by {self.__amount}')
 
 

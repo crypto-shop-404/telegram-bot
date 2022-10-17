@@ -1,3 +1,5 @@
+import contextlib
+
 import aiogram.types
 
 import config
@@ -67,7 +69,8 @@ class PurchaseInformationResponse(base.BaseResponse):
 
     async def _send_response(self):
         text = self.get_text()
-        await self.__query.answer()
+        with contextlib.suppress(aiogram.exceptions.InvalidQueryID):
+            await self.__query.answer()
         await self.__query.message.edit_text(text)
         media_group = None
         is_media_group_sent = False
