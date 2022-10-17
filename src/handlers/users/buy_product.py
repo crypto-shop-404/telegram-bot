@@ -210,9 +210,10 @@ async def pay_with_balance(query: aiogram.types.CallbackQuery, callback_data: di
                 product.id, amount, quantity, payment_type='balance'
             )
             queries.edit_product_quantity(session, product.id, -quantity)
-            queries.top_up_balance(session, product.id, -decimal.Decimal(str(amount)))
-            for product_unit in product_units:
-                queries.add_sold_product_unit(session, sale.id, product_unit.id)
+            with session.begin_nested():
+                queries.top_up_balance(session, user.id, -amount)
+                for product_unit in product_units:
+                    queries.add_sold_product_unit(session, sale.id, product_unit.id)
             await responses.payments.PurchaseInformationResponse(
                 query, sale.id, product.name, quantity, amount, product_units
             )
