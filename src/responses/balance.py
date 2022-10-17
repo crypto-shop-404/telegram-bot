@@ -59,3 +59,11 @@ class SuccessBalanceRefillResponse(base.BaseResponse):
     async def _send_response(self):
         await self.__query.answer()
         await self.__query.message.edit_text(f'✅ Balance was topped up by {self.__amount}')
+
+
+class FailedBalanceRefillResponse(base.BaseResponse):
+    def __init__(self, message: aiogram.types.Message):
+        self.__message = message
+
+    async def _send_response(self):
+        await self.__message.edit_text('🚫 Balance refill failed')
