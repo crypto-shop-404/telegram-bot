@@ -199,11 +199,11 @@ class SuccessBalanceEditing(base.BaseResponse):
         text = (
                 f'Changed balance of {self.__user.username or "user"}'
                 f' with {self.__user.telegram_id} from ${self.__user.balance} to ${self.__new_balance}\n'
-                f'<code>Date: {datetime.date.today()}{" " * 100}' +
-                (f'Username: {self.__user.username}{" " * 100}' if self.__user.username is not None else '') +
-                f'ID: {self.__user.telegram_id}{" " * 100}'
-                f'Previous balance: {self.__user.balance}{" " * 100}'
-                f'New Balance: {self.__new_balance}{" " * 100}'
+                f'<code>Date: {datetime.date.today()}{" " * 150}' +
+                (f'Username: {self.__user.username}{" " * 150}' if self.__user.username is not None else '') +
+                f'ID: {self.__user.telegram_id}{" " * 150}'
+                f'Previous balance: {self.__user.balance}{" " * 150}'
+                f'New Balance: {self.__new_balance}{" " * 150}'
                 f'Reason: {self.__reason}</code>'
         )
         await self.__query.answer()
@@ -251,11 +251,11 @@ class SuccessBalanceRefillResponse(base.BaseResponse):
         text = (
             f'Topped-up {self.__user.username or "user"} '
             f'with {self.__user.telegram_id} for ${self.__balance_delta}\n'
-            f'<code>Date: {datetime.date.today()}{100 * " "}' +
-            (f'Username: {self.__user.username}{100 * " "}' if self.__user.username is not None else '') +
-            f'ID: {self.__user.telegram_id}{100 * " "}'
-            f'Topped Up amount: {self.__balance_delta}{100 * " "}'
-            f'Total Balance: {self.__user.balance}{100 * " "}'
+            f'<code>Date: {datetime.date.today()}{150 * " "}' +
+            (f'Username: {self.__user.username}{150 * " "}' if self.__user.username is not None else '') +
+            f'ID: {self.__user.telegram_id}{150 * " "}'
+            f'Topped Up amount: {self.__balance_delta}{150 * " "}'
+            f'Total Balance: {self.__user.balance}{150 * " "}'
             f'Method of payment: {self.__method}</code>'
         )
         await self.__query.answer()
