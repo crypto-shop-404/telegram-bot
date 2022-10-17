@@ -6,7 +6,6 @@ from aiogram import filters
 import config
 import exceptions
 import responses.balance
-from filters import is_admin
 from keyboards.inline import callback_factories
 from loader import dp
 from services import db_api
@@ -15,7 +14,7 @@ from services.payments_apis import coinbase_api
 from states import balance_states
 
 
-@dp.message_handler(filters.Text('💲 Balance'), is_admin.IsUserAdmin())
+@dp.message_handler(filters.Text('💲 Balance'))
 async def balance(message: aiogram.types.Message):
     with db_api.create_session() as session:
         if not queries.check_is_user_exists(session, message.from_user.id):
