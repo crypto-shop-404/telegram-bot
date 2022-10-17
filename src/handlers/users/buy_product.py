@@ -169,7 +169,7 @@ async def pay_with_coinpayments(query: aiogram.types.CallbackQuery):
                            filters.ChatTypeFilter(aiogram.types.ChatType.PRIVATE))
 async def pay_with_coinbase(query: aiogram.types.CallbackQuery, callback_data: dict[str: str]):
     with db_api.create_session() as session:
-        user = queries.get_user(query.from_user.id)
+        user = queries.get_user(session, telegram_id=query.from_user.id)
         if user is None:
             raise exceptions.UserNotInDatabase
         product = queries.get_product(session, int(callback_data['product_id']))
