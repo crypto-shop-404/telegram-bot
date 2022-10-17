@@ -18,14 +18,28 @@ class CoinbasePaymentLinkResponse(base.BaseResponse):
         await self.__query.answer()
         await self.__query.message.edit_text(
             "<b>Currency</b>: USD\n"
-            f"<b>Quantity</b>: {self.__quantity}\n"
-            f"<b>Amount: {self.__amount}</b>",
+            f"<b>Quantity</b>: {self.__quantity} pc(s).\n"
+            f"<b>Amount: ${self.__amount}.</b>",
+            reply_markup=self.__keyboard
+        )
+
+
+class CoinbasePaymentBalanceResponse(base.BaseResponse):
+    def __init__(self, query: aiogram.types.CallbackQuery, amount: float, payment_url: str):
+        self.__query = query
+        self.__amount = amount
+        self.__keyboard = payments_keyboards.CoinbasePaymentKeyboard(payment_url)
+
+    async def _send_response(self):
+        await self.__query.answer()
+        await self.__query.message.edit_text(
+            "<b>Currency</b>: USD\n"
+            f"<b>Amount: ${self.__amount}.</b>",
             reply_markup=self.__keyboard
         )
 
 
 class FailedPurchaseResponse(base.BaseResponse):
-
     def __init__(self, message: aiogram.types.Message):
         self.__message = message
 
