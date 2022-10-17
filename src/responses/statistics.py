@@ -37,7 +37,7 @@ class StatisticsResponse(base.BaseResponse):
                 '➖➖➖➖➖➖➖➖➖➖\n'
                 '🙍‍♂ Active buyers:\n\n' +
                 ''.join(
-                    [f'{buyer["telegram_id"]}{"|@" + buyer["username"] if buyer["username"] is not None else "|"}'
+                    [f'{buyer["telegram_id"]}{"|@" + buyer["username"] if buyer["username"] is not None else ""}|'
                      f'{buyer["purchase_number"]}|{buyer["orders_amount"]}\n'
                      for buyer in self.__active_buyers]
                 ) +
