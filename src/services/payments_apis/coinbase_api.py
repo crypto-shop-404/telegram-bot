@@ -28,6 +28,8 @@ class CoinbaseAPI(base_payments_api.BasePaymentAPI):
         while not (status := payment['timeline'][-1]['status']) == 'COMPLETED':
             payment.refresh()
             if status in ('EXPIRED', 'CANCELED', 'UNRESOLVED'):
+                if payment['timeline'][-1]['context'] == 'OVERPAID':
+                    return True
                 return False
             await asyncio.sleep(30)
         return True
