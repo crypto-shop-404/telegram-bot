@@ -59,8 +59,6 @@ class SuccessBalanceRefillResponse(base.BaseResponse):
         self.__amount = amount
 
     async def _send_response(self):
-        with contextlib.suppress(aiogram.exceptions.InvalidQueryID):
-            await self.__query.answer()
         await self.__query.message.delete()
         await self.__query.message.answer(f'✅ Balance was topped up by {self.__amount}')
 

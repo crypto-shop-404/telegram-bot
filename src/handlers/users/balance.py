@@ -1,5 +1,4 @@
 import aiogram
-import coinbase_commerce.api_resources
 from aiogram import filters
 
 import config
@@ -79,4 +78,4 @@ async def top_up_balance_with_coinbase(query: aiogram.types.CallbackQuery, callb
                 await responses.balance.SuccessBalanceRefillResponse(query, amount)
                 await notifications.BalanceRefillNotification(amount).send()
             else:
-                await responses.payments.FailedPurchaseResponse(payments_message)
+                await responses.balance.FailedBalanceRefillResponse(payments_message)
