@@ -7,7 +7,7 @@ import responses.balance
 import responses.payments
 from keyboards.inline import callback_factories
 from loader import dp
-from services import db_api
+from services import db_api, notifications
 from services.db_api import queries
 from services.payments_apis import coinbase_api
 from states import balance_states
@@ -68,6 +68,7 @@ async def top_up_balance_with_coinbase(query: aiogram.types.CallbackQuery, callb
         if await api.check_payment(charge):
             queries.top_up_balance(session, user.id, amount)
             await responses.balance.SuccessBalanceRefillResponse(query, amount)
+            await notifications.BalanceRefillNotification(amount).send()
         else:
             queries.top_up_balance(session, user.id, amount)
             await responses.payments.FailedPurchaseResponse(payments_message)

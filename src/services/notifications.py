@@ -83,6 +83,18 @@ class NewPurchaseNotification(BaseNotification):
         return text
 
 
+class BalanceRefillNotification(BaseNotification):
+    def __init__(self, amount: float):
+        self.__amount = amount
+
+    async def send(self, *args):
+        for admin_id in AppSettings().admins_id:
+            try:
+                await bot.send_message(admin_id, f'✅ Balance was topped up by {self.__amount}')
+            except (aiogram.exceptions.BotBlocked, aiogram.exceptions.ChatNotFound):
+                continue
+
+
 class NewSupportRequestNotification(BaseNotification):
     def __init__(self, support_request: schemas.SupportRequest):
         self.__support_request = support_request
