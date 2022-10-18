@@ -71,7 +71,8 @@ class PurchaseInformationResponse(base.BaseResponse):
         text = self.get_text()
         with contextlib.suppress(aiogram.exceptions.InvalidQueryID):
             await self.__query.answer()
-        await self.__query.message.edit_text(text)
+        await self.__query.message.delete()
+        await self.__query.message.answer(text)
         media_group = None
         is_media_group_sent = False
         for i, unit in enumerate(unit for unit in self.__product_units if unit.type == 'document'):
