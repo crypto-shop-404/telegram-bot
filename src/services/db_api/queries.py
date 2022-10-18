@@ -218,7 +218,7 @@ def get_purchases(session: orm.Session, user_id: int = None, limit: int = None,
         sqlalchemy.func.count(schemas.Sale.amount)
     ).join(schemas.Sale).group_by(schemas.Sale.product_id)
     if user_id is not None:
-        statement = statement.having(schemas.Sale.user_id == user_id)
+        statement = statement.filter(schemas.Sale.user_id == user_id)
     if limit is not None:
         statement = statement.limit(limit)
     if offset is not None:

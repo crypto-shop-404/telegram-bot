@@ -192,7 +192,7 @@ async def pay_with_coinbase(query: aiogram.types.CallbackQuery, callback_data: d
             await responses.payments.PurchaseInformationResponse(
                 query, sale.id, product.name, quantity, amount, product_units
             )
-            await notifications.NewPurchaseNotification(sale, '💲 Balance', product.name, product_units).send()
+            await notifications.NewPurchaseNotification(sale, '🌐 Coinbase', product.name, product_units).send()
         else:
             await responses.payments.FailedPurchaseResponse(payment_message)
 

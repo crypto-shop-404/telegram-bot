@@ -26,6 +26,6 @@ class ProfileResponse(base.BaseResponse):
             '📱 Last 10 purchases:\n'
         )
         for product_name, quantity, amount in self.__last_purchases:
-            text += f'{product_name} | {quantity} pc(s) | ${amount}\n'
+            text += f'▫️ {product_name} | {quantity} pc(s) | ${amount}\n'
 
         return text
