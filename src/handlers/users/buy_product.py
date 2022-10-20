@@ -176,7 +176,7 @@ async def pay_with_coinbase(query: aiogram.types.CallbackQuery, callback_data: d
         quantity = int(callback_data['quantity'])
         amount = float(quantity * decimal.Decimal(str(product.price)))
         api = coinbase_api.CoinbaseAPI(config.CoinbaseSettings().api_key)
-        charge = api.create_charge(product.name, product.price, product.description)
+        charge = api.create_charge(product.name, amount, product.description)
         payment_message = await responses.payments.CoinbasePaymentLinkResponse(
             query, amount, quantity, charge['hosted_url'])
         if await api.check_payment(charge):
