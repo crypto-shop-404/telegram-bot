@@ -184,9 +184,10 @@ async def pay_with_coinbase(query: aiogram.types.CallbackQuery, callback_data: d
                 session, user.id, user.username, product.id,
                 amount, quantity, payment_type='coinbase')
             product_units = queries.get_not_sold_product_units(session, product.id, quantity)
-            queries.edit_product_quantity(session, product.id, -quantity)
-            for product_unit in product_units:
-                queries.add_sold_product_unit(session, sale.id, product_unit.id)
+            with session.begin_nested():
+                queries.edit_product_quantity(session, product.id, -quantity)
+                for product_unit in product_units:
+                    queries.add_sold_product_unit(session, sale.id, product_unit.id)
             session.expunge_all()
             session.commit()
             await responses.payments.PurchaseInformationResponse(
@@ -215,8 +216,8 @@ async def pay_with_balance(query: aiogram.types.CallbackQuery, callback_data: di
                 session, user.id, user.username,
                 product.id, amount, quantity, payment_type='balance'
             )
-            queries.edit_product_quantity(session, product.id, -quantity)
             with session.begin_nested():
+                queries.edit_product_quantity(session, product.id, -quantity)
                 queries.top_up_balance(session, user.id, -amount)
                 for product_unit in product_units:
                     queries.add_sold_product_unit(session, sale.id, product_unit.id)
