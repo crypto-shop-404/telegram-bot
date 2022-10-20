@@ -214,8 +214,8 @@ def get_purchases(session: orm.Session, user_id: int = None, limit: int = None,
                   offset: int = None) -> list[tuple[str, int, float]]:
     statement = sqlalchemy.select(
         schemas.Product.name,
-        sqlalchemy.func.count(schemas.Sale.quantity),
-        sqlalchemy.func.count(schemas.Sale.amount)
+        sqlalchemy.func.sum(schemas.Sale.quantity),
+        sqlalchemy.func.sum(schemas.Sale.amount)
     ).join(schemas.Sale).group_by(schemas.Sale.product_id)
     if user_id is not None:
         statement = statement.filter(schemas.Sale.user_id == user_id)
