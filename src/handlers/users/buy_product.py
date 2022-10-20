@@ -187,8 +187,8 @@ async def pay_with_coinbase(query: aiogram.types.CallbackQuery, callback_data: d
             queries.edit_product_quantity(session, product.id, -quantity)
             for product_unit in product_units:
                 queries.add_sold_product_unit(session, sale.id, product_unit.id)
-                session.expunge_all()
-                session.commit()
+            session.expunge_all()
+            session.commit()
             await responses.payments.PurchaseInformationResponse(
                 query, sale.id, product.name, quantity, amount, product_units
             )
