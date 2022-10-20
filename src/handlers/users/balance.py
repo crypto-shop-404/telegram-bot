@@ -68,7 +68,7 @@ async def top_up_balance_with_coinbase(query: aiogram.types.CallbackQuery, callb
         if await api.check_payment(charge):
             queries.top_up_balance(session, user.id, amount)
             await responses.balance.SuccessBalanceRefillResponse(query, amount)
-            await notifications.BalanceRefillNotification(amount).send()
+            await notifications.BalanceRefillNotification(amount, user).send()
         else:
             try:
                 amount = float(charge['timeline'][-1]['payment']['value']['amount'])
@@ -76,6 +76,6 @@ async def top_up_balance_with_coinbase(query: aiogram.types.CallbackQuery, callb
                 amount = 0
             if amount > 0:
                 await responses.balance.SuccessBalanceRefillResponse(query, amount)
-                await notifications.BalanceRefillNotification(amount).send()
+                await notifications.BalanceRefillNotification(amount, user).send()
             else:
                 await responses.balance.FailedBalanceRefillResponse(payments_message)
