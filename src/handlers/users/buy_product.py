@@ -101,7 +101,7 @@ async def product_quantity(query: aiogram.types.CallbackQuery, callback_data: di
 @dp.callback_query_handler(
     callback_factories.BuyProductCallbackFactory().filter(quantity='another', payment_method=''),
     filters.ChatTypeFilter(aiogram.types.ChatType.PRIVATE))
-async def own_product_quantity(query: aiogram.types.CallbackQuery, callback_data: dict[str, str]):
+async def another_product_quantity(query: aiogram.types.CallbackQuery, callback_data: dict[str, str]):
     with db_api.create_session() as session:
         if not queries.check_is_user_exists(session, query.from_user.id):
             raise exceptions.UserNotInDatabase
@@ -112,10 +112,25 @@ async def own_product_quantity(query: aiogram.types.CallbackQuery, callback_data
     )
 
 
-@dp.callback_query_handler(
-    callback_factories.BuyProductCallbackFactory().filter(payment_method=''),
-    filters.ChatTypeFilter(aiogram.types.ChatType.PRIVATE)
-)
+@dp.message_handler(state=product_states.EnterProductQuantity.waiting_quantity)
+async def another_product_quantity(message: aiogram.types.Message, state: dispatcher.FSMContext):
+    with db_api.create_session() as session:
+        if not queries.check_is_user_exists(session, message.from_user.id):
+            raise exceptions.UserNotInDatabase
+    quantity = message.text or ''
+    callback_data = (await state.get_data())['callback_data']
+    await state.finish()
+    if quantity.isdigit() and int(quantity) > 0:
+        await responses.products.PaymentMethodResponse(
+            message, callback_data, crypto_payments=config.PaymentsSettings().crypto_payments
+        )
+    else:
+        await responses.products.IncorrectQuantity(message)
+
+
+@dp.callback_query_handler(callback_factories.BuyProductCallbackFactory().filter(payment_method=''),
+                           filters.ChatTypeFilter(aiogram.types.ChatType.PRIVATE)
+                           )
 async def product_quantity(query: aiogram.types.CallbackQuery, callback_data: dict[str: str]):
     with db_api.create_session() as session:
         if not queries.check_is_user_exists(session, query.from_user.id):
@@ -123,22 +138,6 @@ async def product_quantity(query: aiogram.types.CallbackQuery, callback_data: di
     await responses.products.PaymentMethodResponse(
         query, callback_data, crypto_payments=config.PaymentsSettings().crypto_payments
     )
-
-
-@dp.message_handler(state=product_states.EnterProductQuantity.waiting_quantity)
-async def another_product_quantity(message: aiogram.types.Message, state: dispatcher.FSMContext):
-    with db_api.create_session() as session:
-        if not queries.check_is_user_exists(session, message.from_user.id):
-            raise exceptions.UserNotInDatabase
-    quantity = message.text
-    callback_data = (await state.get_data())['callback_data']
-    await state.finish()
-    if isinstance(quantity, str) and quantity.isdigit() and int(quantity) > 0:
-        await responses.products.PaymentMethodResponse(
-            message, callback_data, crypto_payments=config.PaymentsSettings().crypto_payments
-        )
-    else:
-        await responses.products.IncorrectQuantity(message)
 
 
 @dp.callback_query_handler(callback_factories.BuyProductCallbackFactory().filter(payment_method='qiwi'),
