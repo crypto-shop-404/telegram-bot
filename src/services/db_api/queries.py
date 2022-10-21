@@ -324,8 +324,8 @@ def add_sold_product_unit(session: orm.Session, sale_id: int, product_unit_id) -
 
 def close_support_request(session: orm.Session, request_id: int, answer: str = None) -> schemas.SupportRequest:
     support_request = session.get(schemas.SupportRequest, request_id)
-    support_request.is_open = False
-    if answer is not None:
+    if support_request is not None:
+        support_request.is_open = False
         support_request.answer = answer
     return support_request
 
