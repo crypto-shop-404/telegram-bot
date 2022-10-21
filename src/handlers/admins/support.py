@@ -85,6 +85,7 @@ async def answer_request(query: aiogram.types.CallbackQuery, callback_data: dict
 @dp.message_handler(is_admin.IsUserAdmin(), state=support_states.AnswerSupportRequest.waiting_answer)
 async def answer_request(message: aiogram.types.Message, state: dispatcher.FSMContext):
     callback_data = (await state.get_data())['callback_data']
+    await state.finish()
     with db_api.create_session() as session:
         queries.close_support_request(session, int(callback_data['request_id']), message.text)
         if callback_data['is_open'] == 'yes':
