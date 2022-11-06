@@ -27,16 +27,6 @@ def add_subcategory(session: orm.Session, name: str, category_id: int) -> schema
     return subcategory
 
 
-def add_categories(session: orm.Session, categories: list[str]) -> None:
-    for category_name in categories:
-        add_category(session, category_name)
-
-
-def add_subcategories(session: orm.Session, subcategories: list[str], category_id: int) -> None:
-    for category_name in subcategories:
-        add_subcategory(session, category_name, category_id)
-
-
 def add_product(session: orm.Session, name: str, description: str,
                 price: float, quantity: int, picture: str, category_id: int,
                 subcategory_id: int = None) -> schemas.Product:

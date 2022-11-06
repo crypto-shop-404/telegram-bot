@@ -29,10 +29,7 @@ class AddCategoriesResponse(base.BaseResponse):
 
     async def _send_response(self) -> aiogram.types.Message:
         await self.__query.answer()
-        return await self.__query.message.edit_text(
-            '✏️ Enter the title\n'
-            'One Category - in each row'
-        )
+        return await self.__query.message.edit_text('Enter category name')
 
 
 class CategoryMenuResponse(base.BaseResponse):
@@ -69,12 +66,11 @@ class SuccessRemovalCategoryResponse(base.BaseResponse):
 
 
 class SuccessAddingCategoryResponse(base.BaseResponse):
-    def __init__(self, message: aiogram.types.Message, categories_quantity: int):
+    def __init__(self, message: aiogram.types.Message):
         self.__message = message
-        self.__categories_quantity = categories_quantity
 
     async def _send_response(self) -> aiogram.types.Message:
-        return await self.__message.answer(f'✅ Total categories Added: {self.__categories_quantity}')
+        return await self.__message.answer(f'✅ Category added successfully')
 
 
 class DeleteSubcategoriesResponse(base.BaseResponse):

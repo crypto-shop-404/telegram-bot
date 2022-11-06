@@ -38,10 +38,9 @@ async def add_categories(query: aiogram.types.CallbackQuery):
 @dp.message_handler(is_admin.IsUserAdmin(), state=category_states.AddCategories.waiting_category_name)
 async def add_categories(message: aiogram.types.Message, state: dispatcher.FSMContext):
     await state.finish()
-    category_list = message.text.split('\n')
     with db_api.create_session() as session:
-        queries.add_categories(session, category_list)
-    await responses.category_management.SuccessAddingCategoryResponse(message, len(category_list))
+        queries.add_category(session, message.text)
+    await responses.category_management.SuccessAddingCategoryResponse(message)
     with db_api.create_session() as session:
         await responses.category_management.CategoriesResponse(
             message, queries.get_all_categories(session)
@@ -114,10 +113,9 @@ async def add_subcategories(message: aiogram.types.Message, state: dispatcher.FS
     state_data = await state.get_data()
     await state.finish()
     category_id = state_data['category_id']
-    subcategory_names = message.text.split('\n')
     with db_api.create_session() as session:
-        queries.add_subcategories(session, subcategory_names, category_id)
-    await responses.category_management.SuccessAddingCategoryResponse(message, len(subcategory_names))
+        queries.add_subcategory(session, message.text, category_id)
+    await responses.category_management.SuccessAddingCategoryResponse(message)
     with db_api.create_session() as session:
         await responses.category_management.CategoryMenuResponse(
             message, category_id, queries.get_category(session, category_id).name,
