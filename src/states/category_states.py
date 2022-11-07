@@ -6,4 +6,4 @@ class AddCategories(state.StatesGroup):
 
 
 class AddSubcategories(state.StatesGroup):
-    waiting_subcategory_name = state.State()
+    waiting_name = state.State()
