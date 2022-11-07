@@ -13,7 +13,7 @@ class UserButton(aiogram.types.InlineKeyboardButton):
         callback_data['id'] = user_id
         super().__init__(
             text=f'#{user_tg_id} | {username + " | " if username is not None else ""}'
-                 f'${balance} | {registration_date}',
+                 f'${balance} | {registration_date:%m/%d/%Y}',
             callback_data=callback_factories.UserCallbackFactory().new(**callback_data)
         )
 

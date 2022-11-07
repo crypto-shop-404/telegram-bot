@@ -49,7 +49,7 @@ class UserResponse(base.BaseResponse):
         text = (
                 f'<b>User ID</b>: {self.__user.telegram_id}\n' +
                 (f'<b>Username</b>: @{self.__user.username}\n' if self.__user.username else '') +
-                f'<b>Registration Date</b>: {self.__user.created_at.date()}\n'
+                f'<b>Registration Date</b>: {self.__user.created_at.date():%m/%d/%Y}\n'
                 f'<b>Number of orders</b>: {self.__number_of_orders}\n'
                 f'<b>Balance</b>: ${self.__user.balance}\n\n'
                 f'<b>Status</b>: {"banned" if self.__user.is_banned else "not banned"}'
