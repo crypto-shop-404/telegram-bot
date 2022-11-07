@@ -26,8 +26,8 @@ class User(BaseModel):
 class Category(BaseModel):
     __tablename__ = 'category'
     name = sqlalchemy.Column(sqlalchemy.String(255), nullable=False)
-    subcategory = orm.relationship('Subcategory', backref='category', cascade="all, delete")
 
+    subcategory = orm.relationship('Subcategory', backref='category', cascade="all, delete")
     product = orm.relationship('Product', backref='category', cascade="all, delete")
 
 
@@ -37,6 +37,7 @@ class Subcategory(BaseModel):
     category_id = sqlalchemy.Column(
         sqlalchemy.Integer, sqlalchemy.ForeignKey('category.id', ondelete='CASCADE'), nullable=False
     )
+
     product = orm.relationship('Product', backref='subcategory', cascade="all, delete")
 
 
