@@ -34,10 +34,10 @@ async def categories(query: aiogram.types.CallbackQuery):
     callback_factories.CategoriesCallbackFactory().filter(action='add'), is_admin.IsUserAdmin())
 async def add_category(query: aiogram.types.CallbackQuery):
     await responses.category_management.AddCategoriesResponse(query)
-    await category_states.AddCategories.waiting_category_name.set()
+    await category_states.AddCategories.waiting_title.set()
 
 
-@dp.message_handler(is_admin.IsUserAdmin(), state=category_states.AddCategories.waiting_category_name)
+@dp.message_handler(is_admin.IsUserAdmin(), state=category_states.AddCategories.waiting_title)
 async def add_category(message: aiogram.types.Message, state: dispatcher.FSMContext):
     await state.finish()
     with db_api.create_session() as session:
@@ -145,12 +145,12 @@ async def delete_subcategory(query: aiogram.types.CallbackQuery, callback_data: 
     action='add_subcategory', subcategory_id=''), is_admin.IsUserAdmin()
 )
 async def add_subcategory(query: aiogram.types.CallbackQuery, callback_data: dict[str, str]):
-    await category_states.AddSubcategories.waiting_subcategory_name.set()
+    await category_states.AddSubcategories.waiting_title.set()
     await dp.current_state().update_data({'category_id': int(callback_data['category_id'])})
     await responses.category_management.AddCategoriesResponse(query)
 
 
-@dp.message_handler(is_admin.IsUserAdmin(), state=category_states.AddSubcategories.waiting_subcategory_name)
+@dp.message_handler(is_admin.IsUserAdmin(), state=category_states.AddSubcategories.waiting_title)
 async def add_subcategory(message: aiogram.types.Message, state: dispatcher.FSMContext):
     state_data = await state.get_data()
     await state.finish()
