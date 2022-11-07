@@ -1,4 +1,4 @@
-from .management import dp
+from .menu import dp
 from .add import dp
 from .edit import dp
 from .delete import dp
