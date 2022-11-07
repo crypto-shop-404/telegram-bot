@@ -125,7 +125,6 @@ async def delete_subcategory(query: aiogram.types.CallbackQuery, callback_data: 
 async def delete_subcategory(query: aiogram.types.CallbackQuery, callback_data: dict[str, str]):
     with db_api.create_session() as session:
         category_id = int(callback_data['category_id'])
-        category_name = queries.get_category(session, category_id).name
         subcategory_list = queries.get_subcategories(session, category_id)
         if callback_data['is_confirmed'] == 'no':
             await responses.category_management.DeleteSubcategoriesResponse(
