@@ -29,8 +29,8 @@ class AddCategoriesButton(aiogram.types.InlineKeyboardButton):
 class AddSubcategoriesButton(aiogram.types.InlineKeyboardButton):
     def __init__(self, category_id: int):
         super().__init__(
-            text='📂 Add subcategories', callback_data=callback_factories.CategoryCallbackFactory().new(
-                action='add_subcategories', category_id=category_id, subcategory_id=''
+            text='📂 Add subcategory', callback_data=callback_factories.CategoryCallbackFactory().new(
+                action='add_subcategory', category_id=category_id, subcategory_id=''
             )
         )
 
