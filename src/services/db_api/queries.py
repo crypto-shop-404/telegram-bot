@@ -434,6 +434,20 @@ def delete_support_request(session: orm.Session, support_request_id: int) -> Non
     session.execute(sqlalchemy.delete(schemas.SupportRequest).filter_by(id=support_request_id))
 
 
+def count_subcategories(session: orm.Session, category_id: int) -> int:
+    statement = sqlalchemy.select(sqlalchemy.func.count(schemas.Subcategory.id)).filter_by(
+        category_id=category_id
+    )
+    return session.scalar(statement)
+
+
+def count_products(session: orm.Session, category_id: int, subcategory_id: int = None) -> int:
+    statement = sqlalchemy.select(sqlalchemy.func.count(schemas.Product.id)).filter_by(
+        category_id=category_id, subcategory_id=subcategory_id
+    )
+    return session.scalar(statement)
+
+
 def count_users(session: orm.Session) -> int:
     return session.scalar(sqlalchemy.select(sqlalchemy.func.count(schemas.User.id)))
 

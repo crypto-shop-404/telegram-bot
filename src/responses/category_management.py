@@ -1,6 +1,7 @@
 import aiogram.types
 
 import keyboards.inline.category_management_keyboards
+from keyboards.inline import common_keybords, callback_factories
 from services.db_api import schemas
 from keyboards import inline
 from responses import base
@@ -97,3 +98,44 @@ class SuccessRemovalSubcategoryResponse(base.BaseResponse):
     async def _send_response(self) -> aiogram.types.Message:
         await self.__query.answer()
         return await self.__query.message.edit_text('✅ Category Removed')
+
+
+class ConfirmationRemovalCategoryResponse(base.BaseResponse):
+    def __init__(self, query: aiogram.types.CallbackQuery, number_of_subcategories: int,
+                 number_of_products: int, callback_data: dict[str: str]):
+        self.__query = query
+        self.__number_of_subcategories = number_of_subcategories
+        self.__number_of_products = number_of_products
+        self.__callback_data = callback_data
+
+    async def _send_response(self) -> None:
+        await self.__query.answer()
+        await self.__query.message.edit_text(
+            self.__get_text(), reply_markup=common_keybords.ConfirmationKeyboard(
+                callback_factories.CategoryCallbackFactory(),
+                **self.__callback_data)
+        )
+
+    def __get_text(self) -> str:
+        return (
+            f'Are you sure you want to delete this category with {self.__number_of_subcategories} '
+            f'subcategories and {self.__number_of_products} products?'
+        )
+
+
+class ConfirmationRemovalSubcategoryResponse(base.BaseResponse):
+    def __init__(self, query: aiogram.types.CallbackQuery, number_of_products: int, callback_data: dict[str: str]):
+        self.__query = query
+        self.__number_of_products = number_of_products
+        self.__callback_data = callback_data
+
+    async def _send_response(self) -> None:
+        await self.__query.answer()
+        await self.__query.message.edit_text(
+            self.__get_text(), reply_markup=common_keybords.ConfirmationKeyboard(
+                callback_factories.CategoryCallbackFactory(),
+                **self.__callback_data)
+        )
+
+    def __get_text(self) -> str:
+        return f'Are you sure you want to delete this subcategory with {self.__number_of_products} products?'

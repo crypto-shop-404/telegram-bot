@@ -31,7 +31,7 @@ class CategoriesCallbackFactory(callback_data.CallbackData):
 
 class CategoryCallbackFactory(callback_data.CallbackData):
     def __init__(self):
-        super().__init__('category', 'category_id', 'subcategory_id', 'action')
+        super().__init__('category', 'category_id', 'subcategory_id', 'action', 'is_confirmed')
 
 
 class MailingCallbackFactory(callback_data.CallbackData):

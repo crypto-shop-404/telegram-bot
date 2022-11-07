@@ -12,7 +12,7 @@ class CategoryButton(aiogram.types.InlineKeyboardButton):
     def __init__(self, category_name: str, category_id: int):
         super().__init__(
             text=category_name, callback_data=callback_factories.CategoryCallbackFactory().new(
-                action='manage', category_id=category_id, subcategory_id=''
+                action='manage', category_id=category_id, subcategory_id='', is_confirmed=''
             )
         )
 
@@ -30,7 +30,7 @@ class AddSubcategoriesButton(aiogram.types.InlineKeyboardButton):
     def __init__(self, category_id: int):
         super().__init__(
             text='📂 Add subcategory', callback_data=callback_factories.CategoryCallbackFactory().new(
-                action='add_subcategory', category_id=category_id, subcategory_id=''
+                action='add_subcategory', category_id=category_id, subcategory_id='', is_confirmed=''
             )
         )
 
@@ -39,7 +39,7 @@ class DeleteSubcategoriesButton(aiogram.types.InlineKeyboardButton):
     def __init__(self, category_id: int):
         super().__init__(
             text='🗑 Remove subcategories', callback_data=callback_factories.CategoryCallbackFactory().new(
-                action='delete_subcategories', category_id=category_id, subcategory_id=''
+                action='delete_subcategories', category_id=category_id, subcategory_id='', is_confirmed=''
             )
         )
 
@@ -48,7 +48,7 @@ class DeleteCategoryButton(aiogram.types.InlineKeyboardButton):
     def __init__(self, category_id: int):
         super().__init__(
             text='🗑 Delete Category', callback_data=callback_factories.CategoryCallbackFactory().new(
-                action='delete', category_id=category_id, subcategory_id=''
+                action='delete', category_id=category_id, subcategory_id='', is_confirmed=''
             )
         )
 
@@ -57,6 +57,6 @@ class SubcategoryForRemovalButton(aiogram.types.InlineKeyboardButton):
     def __init__(self, subcategory_name: str, subcategory_id: int, category_id: int):
         super().__init__(
             text=subcategory_name, callback_data=callback_factories.CategoryCallbackFactory().new(
-                action='delete', subcategory_id=subcategory_id, category_id=category_id
+                action='delete', subcategory_id=subcategory_id, category_id=category_id, is_confirmed=''
             )
         )

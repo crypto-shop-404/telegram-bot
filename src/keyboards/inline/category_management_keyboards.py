@@ -40,7 +40,8 @@ class SubcategoriesForRemovalKeyboard(aiogram.types.InlineKeyboardMarkup):
         self.row(
             navigation_buttons.InlineBackButton(
                 callback_query=callback_factories.CategoryCallbackFactory().new(
-                    action='manage', category_id=category_id, subcategory_id=''
+                    action='manage', category_id=category_id, subcategory_id='',
+                    is_confirmed=''
                 )
             ),
             common_buttons.CloseButton()
