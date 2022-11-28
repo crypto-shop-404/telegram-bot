@@ -1,10 +1,9 @@
-import datetime
-
 import aiogram.types
 
 from keyboards.inline import users_keyboard, common_keybords, callback_factories
 from responses import base
 from services.db_api import schemas
+from services.time_helpers import get_new_york_now
 
 
 class UsersResponse(base.BaseResponse):
@@ -196,10 +195,11 @@ class SuccessBalanceEditing(base.BaseResponse):
         self.__reason = reason
 
     async def _send_response(self):
+        now = get_new_york_now()
         text = (
                 f'Changed balance of {self.__user.username or "user"}'
                 f' with {self.__user.telegram_id} from ${self.__user.balance} to ${self.__new_balance}\n'
-                f'<code>Date: {datetime.date.today()}{" " * 150}' +
+                f'<code>Date: {now:"%m/%d/%Y"}{" " * 150}' +
                 (f'Username: {self.__user.username}{" " * 150}' if self.__user.username is not None else '') +
                 f'ID: {self.__user.telegram_id}{" " * 150}'
                 f'Previous balance: {self.__user.balance}{" " * 150}'
@@ -248,10 +248,11 @@ class SuccessBalanceRefillResponse(base.BaseResponse):
         self.__method = method
 
     async def _send_response(self):
+        now = get_new_york_now()
         text = (
             f'Topped-up {self.__user.username or "user"} '
             f'with {self.__user.telegram_id} for ${self.__balance_delta}\n'
-            f'<code>Date: {datetime.date.today()}{150 * " "}' +
+            f'<code>Date: {now:"%m/%d/%Y"}{150 * " "}' +
             (f'Username: {self.__user.username}{150 * " "}' if self.__user.username is not None else '') +
             f'ID: {self.__user.telegram_id}{150 * " "}'
             f'Topped Up amount: {self.__balance_delta}{150 * " "}'
